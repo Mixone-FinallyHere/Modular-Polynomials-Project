@@ -1,38 +1,50 @@
 #ifndef POLYNOMIAL_HPP
 #define POLYNOMIAL_HPP
 
-class Polynomial
+#include <string>
+#include "dynamicvector.hpp"
+using namespace std;
+
+
+// default size of our dynamic coefficient array
+const size_t DEFAULTPOLY = 50;
+
+template<class T>
+class Polynomial: friend DynamicVector<T>
 {
+
 private:
- int _base;
- Node* _coeff;
 
- void _show (Node* l, int level);
- real _value0 (Node* l, int x);
+  size_t maxPoly;    // size of array
+  double *coeff;     // dynamic array
+
 public:
- Polynomial (void);
- Polynomial (int base, Node* coeff);
- Polynomial (const Polynomial& a); // clone
- ~Polynomial (); // delete
 
- Polynomial& operator= (const Polynomial& rhs); // assignment
-
- Polynomial& operator+= (const Polynomial& rhs); // add
- const Polynomial operator+ (const Polynomial& other) const; //add
-
- const Polynomial operator- (void) const; //neg
-
- Polynomial& operator-= (const Polynomial& rhs); // subtract
- const Polynomial operator- (const Polynomial& other) const; //subtract
-
- Polynomial& operator*= (const Polynomial& rhs); // multiply
- const Polynomial operator* (const Polynomial& other) const; //multiply
-
- Polynomial& operator^= (int power); // power
- const Polynomial operator^ (int power) const; //power
-
- real valueAt (real x); // valueAt
- void show (void); // print
+  Polynomial ();
+  Polynomial (size_t size);
+  Polynomial (const Polynomial& aPoly);
+  ~Polynomial ();
+  const Polynomial& operator= (const Polynomial& rhs);
+  size_t maxSize() const;
+  void grow (size_t newSize);
+  size_t degree () const;
+  void setCoeff (double value, size_t i);
+  double retrieveCoeff (size_t i) const;
+  void incrementCoeff (double value, size_t i);
+  string toString () const;
+  size_t numOfTerms () const;
+  double evaluate (double x) const;
+  void add (const Polynomial& aPoly);
+  void subtract (const Polynomial& aPoly);
+  Polynomial operator+ (const Polynomial& rhs) const;
+  Polynomial operator- (const Polynomial& rhs) const;
+  bool equals (const Polynomial& aPoly) const;
+  bool operator== (const Polynomial& rhs) const;
+  bool operator!= (const Polynomial& rhs) const;
+  void negate ();
+  void multByConst (double val);
+  void derivative ();
+  friend ostream& operator<< (ostream& os, const Polynomial &p);
 };
-
 #endif
+

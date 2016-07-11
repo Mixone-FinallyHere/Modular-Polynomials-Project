@@ -2,6 +2,7 @@
 #define VECTOR_HPP
 
 #include <assert.h>
+#include "stack.hpp"
 
 using namespace std;
 
@@ -11,7 +12,9 @@ class Vector
 private:
     int _size;
 protected:
-    T contents[];
+    Stack<T> contents;
+    // Tiene que ser pasado a template aun, allocation statica ya definida por un
+    // tamanio concreto
 public:
     Vector() {};
     virtual ~Vector() {};

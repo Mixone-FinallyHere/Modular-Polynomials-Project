@@ -1,181 +1,307 @@
+#include <iostream>
+#include <sstream>
+#include <stdexcept>
+#include <cmath>
 #include "polynomial.hpp"
+using namespace std;
 
-Polynomial::Polynomial (void) {
- _base = 0;
- _coeff = EMPTY;
-}
 
-Polynomial::Polynomial (int base, Node* coeff) {
- _base = base;
- _coeff = copy(coeff);
-}
-
-Polynomial::Polynomial (const Polynomial& a) {
- _base = a._base;
- _coeff = copy(a._coeff);
-}
-
-Polynomial::~Polynomial (void) {
- freeAll(_coeff);
-}
-
-Polynomial&
-Polynomial::operator= (const Polynomial& rhs) {
- if (this == &rhs)
-   return *this;
-
- freeAll(this->_coeff);
- this->_base = rhs._base;
- this->_coeff = copy(rhs._coeff);
- return *this;
-}
-
-Polynomial&
-Polynomial::operator+= (const Polynomial& rhs) {
- Node* temp_coeff_1;
- Node* temp_coeff_2;
- int result_base;
- if (rhs._base > this->_base) {
-   result_base = this->_base;
-   temp_coeff_1 = copy(rhs._coeff);
-   for (int i = 0; i < (rhs._base - this->_base); i += 1) {
-     temp_coeff_1 = prepend(temp_coeff_1, 0);
-   }
-   temp_coeff_2 = this->_coeff;
- } else {
-   result_base = rhs._base;
-   temp_coeff_1 = copy(this->_coeff);
-   for (int i = 0; i < (this->_base - rhs._base); i += 1) {
-     temp_coeff_1 = prepend(temp_coeff_1, 0);
-   }
-   temp_coeff_2 = rhs._coeff;
- }
- Node* result_coeff = add(temp_coeff_1, temp_coeff_2);
- freeAll(temp_coeff_1);
- freeAll(this->_coeff);
- this->_base = result_base;
- this->_coeff = result_coeff;
- return *this;
+Polynomial::Polynomial()
+{
+    coeff = new double [DEFAULTPOLY];
+    for (int i = 0; i < (int) DEFAULTPOLY; i++)
+    {
+        coeff[i] = 0.0;
+    }
+    maxPoly = DEFAULTPOLY;
 }
 
 
-const Polynomial
-Polynomial::operator+ (const Polynomial& other) const {
- Polynomial result = *this;
- result += other;
- return result;
+Polynomial::Polynomial(size_t size)
+{
+    coeff = new double[size];
+    for (int i = 0; i < (int) size; i++)
+    {
+        coeff[i] = 0.0;
+    }
+    maxPoly = size;
 }
 
 
-const Polynomial
-Polynomial::operator- (void) const {
- Polynomial result = *this;
- Node* coeff = scalar_multiply(this->_coeff, -1.0);
- freeAll(result._coeff);
- result._coeff = coeff;
- return result;
-}
-
-Polynomial &
-Polynomial::operator-= (const Polynomial& rhs) {
- Polynomial result = *this + (-rhs);
- this->_base = result._base;
- freeAll(this->_coeff);
- this->_coeff = copy(result._coeff);
- return *this;
-}
-
-const Polynomial
-Polynomial::operator- (const Polynomial& rhs) const {
- Polynomial result = *this;
- result -= rhs;
- return result;
-}
-
-Polynomial&
-Polynomial::operator*= (const Polynomial& rhs) {
- this->_base = this->_base + rhs._base;
- Node* result_coeff = multiply(this->_coeff, rhs._coeff);
- freeAll(this->_coeff);
- this->_coeff = result_coeff;
- return *this;
-}
-
-const Polynomial
-Polynomial::operator* (const Polynomial& other) const {
- Polynomial result = *this;
- result *= other;
- return result;
-}
-
-Polynomial&
-Polynomial::operator^= (int power) {
- assert (power >= 1);
- Polynomial result = (*this);
- for (int i = 0; i < power-1; i += 1) {
-   result *= (*this);
- }
- this->_base = result._base;
- freeAll(this->_coeff);
- this->_coeff = copy(result._coeff);
- return *this;
-}
-
-const Polynomial
-Polynomial::operator^ (int power) const {
- Polynomial result = *this;
- result ^= power;
- return result;
+Polynomial::Polynomial(const Polynomial& aPoly)
+{
+    coeff = new double[aPoly.maxPoly];
+    for (int i = 0; i < (int) aPoly.maxPoly; i++)
+    {
+        coeff[i] = aPoly.coeff[i];
+    }
+    maxPoly = aPoly.maxPoly;
 }
 
 
-void
-Polynomial::show (void) {
- _show(_coeff, _base);
- std::cout << std::endl;
+Polynomial::~Polynomial()
+{
+    delete[] coeff;
 }
 
-void
-Polynomial::_show (Node* l, int level) {
- if (length(l) == 0) {
-   return;
- }
- _show(tail(l), level+1);
- real coeff = head(l);
- if (coeff != 0) {
-   std::stringstream coeff_str;
-   std::stringstream level_str;
-
-   if (coeff > 0 && (length(l) > 1)) {
-     coeff_str << "+";
-   } else if (coeff < 0) {
-     coeff_str << "-";
-     coeff = -coeff;
-   }
-   if (!(coeff == 1.0 && level != 0)) {
-     coeff_str << coeff;
-   }
-
-   if (level == 0) {
-     level_str << "";
-   } else if (level == 1) {
-     level_str << "x";
-   } else if (level > 0) {
-     level_str << "x^" << level;
-   } else if (level < 0) {
-     level_str << "x^(" << level << ")";
-   }
-   std::cout << coeff_str.str() << level_str.str();
- }
+const Polynomial& Polynomial::operator= (const Polynomial& rhs)
+{
+    if (this == &rhs){
+        return *this;
+    }
+    Polynomial tmp(rhs);
+    std::swap(maxPoly, tmp.maxPoly);
+    std::swap(coeff, tmp.coeff);
+    return *this;
 }
 
-real
-Polynomial::valueAt (real x) {
- return std::pow(x, _base) * _value0(_coeff, x);
+
+size_t Polynomial::maxSize() const
+{
+    size_t maxSize = maxPoly;
+    return maxSize;
 }
 
-real
-Polynomial::_value0 (Node* l, int x) {
- if (length(l) == 0) return 0;
- return head(l) + x * _value0(tail(l), x);
+
+void Polynomial::grow(size_t newSize)
+{
+    int arrSize = (int) maxPoly;
+    if ((int) newSize > arrSize)
+    {
+        double* newArrPtr = new double[newSize];
+        for (int i = 0; i < arrSize; i++)
+        {
+            newArrPtr[i] = coeff[i];
+        }
+        std::swap(newArrPtr, coeff);
+        std::swap(newSize, maxPoly);
+    }
+
+}
+
+size_t Polynomial::degree() const
+{
+    size_t degree = 0;
+    for (int i = 0; i < (int)maxPoly; i++)
+    {
+        if (coeff[i] != 0)
+        {
+            degree = (size_t)i;
+        }
+    }
+    return degree;
+}
+
+
+void Polynomial::setCoeff(double value, size_t i)
+{
+    if ((size_t)0 <= i && i <= maxPoly)
+    {
+        if (i > maxPoly)
+        {
+            grow(i);
+        }
+        coeff[i] = value;
+    }
+    else
+    {
+        throw std::out_of_range("Index out of range");
+    }
+}
+
+double Polynomial::retrieveCoeff(size_t i) const
+{
+    if (0 <= (int)i)
+    {
+        return coeff[i];
+    }
+    else if (i >= (int)maxPoly)
+    {
+        return 0.0;
+    }
+    else
+    {
+        throw std::out_of_range("Index out of range");
+    }
+}
+
+void Polynomial::incrementCoeff(double value, size_t i)
+{
+    if (0 <= (int)i)
+    {
+        if (i > (int)maxPoly)
+        {
+            grow(i);
+        }
+        coeff[i] *= value;
+    }
+    else
+    {
+        throw std::out_of_range("Index out of range");
+    }
+
+}
+
+string Polynomial::toString() const
+{
+    ostringstream result;
+    bool printedSomething = false;
+    for (int i = (int)degree(); i >= 0; i--)
+    {
+        double c = retrieveCoeff(i);
+        if (c != 0.0)
+        {
+            printedSomething = true;
+            if (i == 0)
+            {
+                result.setf(ios::showpos);
+                result << " " << c;
+                result.unsetf(ios::showpos);
+            }
+            else
+            {
+                result.setf(ios::showpos);
+                result << " " << c;
+                result.unsetf(ios::showpos);
+                result << "*X^" << i;
+            }
+        }
+    }
+    if (!printedSomething)
+    {
+        result.setf(ios::showpos);
+        result << " " << 0;
+        result.unsetf(ios::showpos);
+    }
+    return result.str();
+
+}
+
+
+size_t Polynomial::numOfTerms() const
+{
+    size_t numTerms = 0;
+    for (int i = 0; i < (int)maxPoly; i++)
+    {
+        if (coeff[i] != 0)
+        {
+            numTerms++;
+        }
+    }
+    return numTerms;
+}
+
+double Polynomial::evaluate(double x) const
+{
+    double polyTotal = 0.0;
+    double coeff = 0.0;
+    for (int i = 0; i < (int) maxPoly; i++)
+    {
+        coeff = retrieveCoeff((size_t) i);
+        polyTotal += (coeff * pow(x, (double)i));
+    }
+    return polyTotal;
+}
+
+void Polynomial::add(const Polynomial& aPoly)
+{
+    if (aPoly.maxPoly > maxPoly)
+    {
+        grow(aPoly.maxPoly);
+    }
+    for (int i = 0; i < (int)maxPoly; i++)
+    {
+        coeff[i] += aPoly.coeff[i];
+    }
+}
+
+void Polynomial::subtract(const Polynomial& aPoly)
+{
+    if (aPoly.maxPoly > maxPoly)
+    {
+        grow(aPoly.maxPoly);
+    }
+    for (int i = 0; i < (int) maxPoly; i++)
+    {
+        coeff[i] -= aPoly.coeff[i];
+    }
+}
+
+Polynomial Polynomial::operator+ (const Polynomial& rhs) const
+{
+    Polynomial result;
+    result.add(*this);
+    result.add(rhs);
+    return result;
+}
+
+Polynomial Polynomial::operator- (const Polynomial& rhs) const
+{
+    Polynomial result;
+    result.subtract(*this);
+    result.subtract(rhs);
+    return result;
+}
+
+bool Polynomial::equals(const Polynomial& aPoly) const
+{
+    if (maxPoly != aPoly.maxPoly)
+    {
+        return(false);
+    }
+    for (int i = 0; i < (int) maxPoly; i++)
+    {
+        if (aPoly.coeff[i] != coeff[i])
+        {
+            return(false);
+        }
+    }
+    return(true);
+}
+
+
+bool Polynomial::operator== (const Polynomial& rhs) const
+{
+    return equals(rhs);
+}
+
+bool Polynomial::operator!= (const Polynomial& rhs) const
+{
+    return !equals(rhs);
+}
+
+
+void Polynomial::negate()
+{
+    multByConst(-1.0);
+}
+
+void Polynomial::multByConst(double val)
+{
+    double* tmpArray = new double[maxPoly];
+    for (int i = 0; i < (int)maxPoly; i++)
+    {
+        tmpArray[i] = retrieveCoeff((size_t)i) * val;
+    }
+    std::swap(tmpArray, coeff);
+}
+
+void Polynomial::derivative()
+{
+    size_t derivArrSize = maxPoly - 1;
+    double* derivArrPtr = new double[derivArrSize];
+    for (int i = 1; i < (int) maxPoly; i++)
+    {
+        double coeffOfDeriv = retrieveCoeff((size_t)i) * (double)i;
+        i -= 1;
+        derivArrPtr[i] = coeffOfDeriv;
+    }
+    std::swap(derivArrPtr, coeff);
+    std::swap(derivArrSize, maxPoly);
+}
+
+ostream & operator << (ostream &out, const Polynomial& p)
+{
+    out << p.toString();
+    return out;
 }
