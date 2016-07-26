@@ -305,3 +305,4 @@ ostream & operator << (ostream &out, const Polynomial& p)
     out << p.toString();
     return out;
 }
+
