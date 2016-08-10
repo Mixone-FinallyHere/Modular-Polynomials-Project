@@ -11,7 +11,7 @@
 
 
 template <typename Elem>
-class PolyDyn: public VectPoly<Elem>, public VectDyn<Elem>
+class PolyDyn: public VectPoly<Elem>, public DynamicVector<Elem>
 {
 	protected:
 		using VectPoly<Elem>::_dim;
@@ -36,8 +36,8 @@ class PolyDyn: public VectPoly<Elem>, public VectDyn<Elem>
 		virtual PolyDyn<Elem>& operator=(Vector<Elem>&&) override;
 		virtual PolyDyn<Elem>& operator=(const VectPoly<Elem>&) override;	//=VectPoly (redefini)
 		virtual PolyDyn<Elem>& operator=(VectPoly<Elem>&&) override;
-		virtual PolyDyn<Elem>& operator=(const VectDyn<Elem>&) override;	//=VectDyn (redefini)
-		virtual PolyDyn<Elem>& operator=(VectDyn<Elem>&&) override;
+		virtual PolyDyn<Elem>& operator=(const DynamicVector<Elem>&) override;	//=DynamicVector (redefini)
+		virtual PolyDyn<Elem>& operator=(DynamicVector<Elem>&&) override;
 		virtual PolyDyn<Elem>& operator=(const PolyDyn<Elem>&);		//=PolyDyn (copie)
 		virtual PolyDyn<Elem>& operator=(PolyDyn<Elem>&&);
 
@@ -56,38 +56,38 @@ template <typename Elem>
 PolyDyn<Elem>::PolyDyn():
 	Vector<Elem>(),
 	VectPoly<Elem>(),
-	VectDyn<Elem>() {} //Ctr par defaut (trivial): polynome nul
+	DynamicVector<Elem>() {} //Ctr par defaut (trivial): polynome nul
 
 template <typename Elem>
 PolyDyn<Elem>::PolyDyn(const Elem& element, std::size_t dim):
     Vector<Elem>(element, dim),
     VectPoly<Elem>(element, dim),
-    VectDyn<Elem>(element, dim) {} //Ctr correspondants de classes parentes
+    DynamicVector<Elem>(element, dim) {} //Ctr correspondants de classes parentes
 
 template <typename Elem>
 PolyDyn<Elem>::PolyDyn(const Elem* elemArray, std::size_t dim):
     Vector<Elem>(elemArray, dim),
     VectPoly<Elem>(elemArray, dim),
-    VectDyn<Elem>(elemArray, dim) {} //Ctr correspondants de classes parentes
+    DynamicVector<Elem>(elemArray, dim) {} //Ctr correspondants de classes parentes
 
 /**de copie**/
 template <typename Elem>
 PolyDyn<Elem>::PolyDyn(const PolyDyn<Elem>& poly):
     Vector<Elem>(poly),
     VectPoly<Elem>(poly),
-    VectDyn<Elem>(poly) {} //Appelle ctrs. copie
+    DynamicVector<Elem>(poly) {} //Appelle ctrs. copie
 
 /**de transfert**/
 template <typename Elem>
 PolyDyn<Elem>::PolyDyn(PolyDyn<Elem>&& poly):
     Vector<Elem>(std::forward<VectPoly<Elem>>(poly)),
     VectPoly<Elem>(std::forward<VectPoly<Elem>>(poly)),
-    VectDyn<Elem>(std::forward<VectPoly<Elem>>(poly)) {} //Appelle ctrs. transfert
+    DynamicVector<Elem>(std::forward<VectPoly<Elem>>(poly)) {} //Appelle ctrs. transfert
 
 /**de conversion**/
 template <typename Elem>
 PolyDyn<Elem>::PolyDyn(const VectPoly<Elem>& vect):
-	Vector<Elem>(vect), VectPoly<Elem>(vect), VectDyn<Elem>(vect) {} //Conversion: copie & evalue degre
+	Vector<Elem>(vect), VectPoly<Elem>(vect), DynamicVector<Elem>(vect) {} //Conversion: copie & evalue degre
 
 
 
@@ -97,7 +97,7 @@ PolyDyn<Elem>::PolyDyn(const VectPoly<Elem>& vect):
 template <typename Elem>
 PolyDyn<Elem>& PolyDyn<Elem>::operator=(const Vector<Elem>& vect)
 {
-    this->VectDyn<Elem>::operator=(vect);//Appelle op. de copie de VectDyn
+    this->DynamicVector<Elem>::operator=(vect);//Appelle op. de copie de DynamicVector
     this->evalDeg(); //Met degre a jour
     return *this;
 }
@@ -105,16 +105,16 @@ PolyDyn<Elem>& PolyDyn<Elem>::operator=(const Vector<Elem>& vect)
 template <typename Elem>
 PolyDyn<Elem>& PolyDyn<Elem>::operator=(const VectPoly<Elem>& poly)
 {
-    this->VectDyn<Elem>::operator=(poly);//Appelle op. de copie de VectDyn
+    this->DynamicVector<Elem>::operator=(poly);//Appelle op. de copie de DynamicVector
     _deg = poly.deg();
     _degModified = false; //Degre mis a jour
 	return *this;
 }
 /**assignation a vecteur dynamique**/
 template <typename Elem>
-PolyDyn<Elem>& PolyDyn<Elem>::operator=(const VectDyn<Elem>& vect)
+PolyDyn<Elem>& PolyDyn<Elem>::operator=(const DynamicVector<Elem>& vect)
 {
-    this->VectDyn<Elem>::operator=(vect);//Appelle op. de copie de VectDyn
+    this->DynamicVector<Elem>::operator=(vect);//Appelle op. de copie de DynamicVector
     this->evalDeg(); //Met degre a jour
     return *this;
 }
@@ -122,7 +122,7 @@ PolyDyn<Elem>& PolyDyn<Elem>::operator=(const VectDyn<Elem>& vect)
 template <typename Elem>
 PolyDyn<Elem>& PolyDyn<Elem>::operator=(const PolyDyn<Elem>& poly)
 {
-    this->VectDyn<Elem>::operator=(poly);//Appelle op. de copie de VectDyn
+    this->DynamicVector<Elem>::operator=(poly);//Appelle op. de copie de DynamicVector
     _deg = poly.deg();
     _degModified = false; //Degre mis a jour
     return *this;
@@ -133,7 +133,7 @@ PolyDyn<Elem>& PolyDyn<Elem>::operator=(const PolyDyn<Elem>& poly)
 template <typename Elem>
 PolyDyn<Elem>& PolyDyn<Elem>::operator=(Vector<Elem>&& vect)
 {
-    this->VectDyn<Elem>::operator=(std::move(vect));//Appelle op. transfert de VectDyn
+    this->DynamicVector<Elem>::operator=(std::move(vect));//Appelle op. transfert de DynamicVector
     this->evalDeg(); //Met degre a jour
     return *this;
 }
@@ -141,16 +141,16 @@ PolyDyn<Elem>& PolyDyn<Elem>::operator=(Vector<Elem>&& vect)
 template <typename Elem>
 PolyDyn<Elem>& PolyDyn<Elem>::operator=(VectPoly<Elem>&& poly)
 {
-    this->VectDyn<Elem>::operator=(std::move(poly));//Appelle op. transfert de VectDyn
+    this->DynamicVector<Elem>::operator=(std::move(poly));//Appelle op. transfert de DynamicVector
     _deg = poly.deg();
     _degModified = false; //Degre mis a jour
 	return *this;
 }
 /**transfert d'un vecteur dynamique**/
 template <typename Elem>
-PolyDyn<Elem>& PolyDyn<Elem>::operator=(VectDyn<Elem>&& vect)
+PolyDyn<Elem>& PolyDyn<Elem>::operator=(DynamicVector<Elem>&& vect)
 {
-    this->VectDyn<Elem>::operator=(std::move(vect));//Appelle op. transfert de VectDyn
+    this->DynamicVector<Elem>::operator=(std::move(vect));//Appelle op. transfert de DynamicVector
     this->evalDeg(); //Met degre a jour
     return *this;
 }
@@ -158,7 +158,7 @@ PolyDyn<Elem>& PolyDyn<Elem>::operator=(VectDyn<Elem>&& vect)
 template <typename Elem>
 PolyDyn<Elem>& PolyDyn<Elem>::operator=(PolyDyn<Elem>&& poly)
 {
-	this->VectDyn<Elem>::operator=(std::move(poly));//Appelle op. transfert de VectDyn
+	this->DynamicVector<Elem>::operator=(std::move(poly));//Appelle op. transfert de DynamicVector
 	_deg = poly.deg();
 	_degModified = false; //Degre mis a jour
 	return *this;
@@ -169,7 +169,7 @@ PolyDyn<Elem>& PolyDyn<Elem>::operator=(PolyDyn<Elem>&& poly)
 template <typename Elem>
 void PolyDyn<Elem>::operator+=(const Vector<Elem>& vect)
 {
-    this->VectDyn<Elem>::operator+=(vect); //Appelle op. += de VectDyn
+    this->DynamicVector<Elem>::operator+=(vect); //Appelle op. += de DynamicVector
     this->evalDeg(); //Reevalue degre
 }
 
@@ -177,7 +177,7 @@ void PolyDyn<Elem>::operator+=(const Vector<Elem>& vect)
 template <typename Elem>
 void PolyDyn<Elem>::operator-=(const Vector<Elem>& vect)
 {
-    this->VectDyn<Elem>::operator-=(vect); //Appelle op. += de VectDyn
+    this->DynamicVector<Elem>::operator-=(vect); //Appelle op. += de DynamicVector
     this->evalDeg(); //Reevalue degre
 }
 

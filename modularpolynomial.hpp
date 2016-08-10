@@ -14,7 +14,7 @@ template <typename Elem>
 using PolyDiv = const PolyDyn<Elem>&;//Typedef de PolyDiv "a la C++11" (alias template)
 
 template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
-class PolyMod: public VectPoly<Elem>, public VectStat<Elem, Dimens>
+class PolyMod: public VectPoly<Elem>, public StaticVector<Elem, Dimens>
 {
 	protected:
 		using VectPoly<Elem>::_dim;
@@ -39,8 +39,8 @@ class PolyMod: public VectPoly<Elem>, public VectStat<Elem, Dimens>
 		virtual PolyMod<Elem, Dimens, DivNeg>& operator=(Vector<Elem>&&) override;
 		virtual PolyMod<Elem, Dimens, DivNeg>& operator=(const VectPoly<Elem>&) override;	//=VectPoly (redefini)
 		virtual PolyMod<Elem, Dimens, DivNeg>& operator=(VectPoly<Elem>&&) override;
-		virtual PolyMod<Elem, Dimens, DivNeg>& operator=(const VectStat<Elem, Dimens>&) override;	//=VectStat (redefini)
-		virtual PolyMod<Elem, Dimens, DivNeg>& operator=(VectStat<Elem, Dimens>&&) override;
+		virtual PolyMod<Elem, Dimens, DivNeg>& operator=(const StaticVector<Elem, Dimens>&) override;	//=StaticVector (redefini)
+		virtual PolyMod<Elem, Dimens, DivNeg>& operator=(StaticVector<Elem, Dimens>&&) override;
 		virtual PolyMod<Elem, Dimens, DivNeg>& operator=(const PolyMod<Elem, Dimens, DivNeg>&);	//=PolyMod (copie)
 		virtual PolyMod<Elem, Dimens, DivNeg>& operator=(PolyMod<Elem, Dimens, DivNeg>&&);
 
@@ -62,40 +62,40 @@ template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
 PolyMod<Elem, Dimens, DivNeg>::PolyMod():
 	Vector<Elem>(),
 	VectPoly<Elem>(),
-	VectStat<Elem, Dimens>() {} //Ctr par defaut (trivial): polynome nul
+	StaticVector<Elem, Dimens>() {} //Ctr par defaut (trivial): polynome nul
 
 template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
 PolyMod<Elem, Dimens, DivNeg>::PolyMod(const Elem& element):
     Vector<Elem>(element, Dimens),
     VectPoly<Elem>(element, Dimens),
-    VectStat<Elem, Dimens>(element) {} //Ctr correspondants de classes parentes
+    StaticVector<Elem, Dimens>(element) {} //Ctr correspondants de classes parentes
 
 template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
 PolyMod<Elem, Dimens, DivNeg>::PolyMod(const Elem* elemArray):
     Vector<Elem>(elemArray, Dimens),
     VectPoly<Elem>(elemArray, Dimens),
-    VectStat<Elem, Dimens>(elemArray) {} //Ctr correspondants de classes parentes
+    StaticVector<Elem, Dimens>(elemArray) {} //Ctr correspondants de classes parentes
 
 /**de copie**/
 template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
 PolyMod<Elem, Dimens, DivNeg>::PolyMod(const PolyMod<Elem, Dimens, DivNeg>& poly):
     Vector<Elem>(poly),
     VectPoly<Elem>(poly),
-    VectStat<Elem, Dimens>(poly) {} //Appelle ctrs. copie
+    StaticVector<Elem, Dimens>(poly) {} //Appelle ctrs. copie
 
 /**de transfert**/
 template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
 PolyMod<Elem, Dimens, DivNeg>::PolyMod(PolyMod<Elem, Dimens, DivNeg>&& poly):
     Vector<Elem>(std::forward<PolyMod<Elem, Dimens, DivNeg>>(poly)),
     VectPoly<Elem>(std::forward<PolyMod<Elem, Dimens, DivNeg>>(poly)),
-    VectStat<Elem, Dimens>(std::forward<PolyMod<Elem, Dimens, DivNeg>>(poly)) {} //Appelle ctrs. transfert
+    StaticVector<Elem, Dimens>(std::forward<PolyMod<Elem, Dimens, DivNeg>>(poly)) {} //Appelle ctrs. transfert
 
 /**de conversion**/
 template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
 PolyMod<Elem, Dimens, DivNeg>::PolyMod(const VectPoly<Elem>& poly):
     Vector<Elem>(poly),
     VectPoly<Elem>(poly),
-    VectStat<Elem, Dimens>(static_cast<VectStat<Elem, Dimens>>(poly)) {}
+    StaticVector<Elem, Dimens>(static_cast<StaticVector<Elem, Dimens>>(poly)) {}
 
 
 
@@ -104,23 +104,23 @@ PolyMod<Elem, Dimens, DivNeg>::PolyMod(const VectPoly<Elem>& poly):
 template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
 PolyMod<Elem, Dimens, DivNeg>& PolyMod<Elem, Dimens, DivNeg>::operator=(const Vector<Elem>& vect)
 {
-    this->VectStat<Elem, Dimens>::operator=(vect);//Appel a la methode de VectStat
+    this->StaticVector<Elem, Dimens>::operator=(vect);//Appel a la methode de StaticVector
     this->evalDeg(); //Met degre a jour
     return *this;
 }
 /**assignation a vecteur polynome**/
 template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
 PolyMod<Elem, Dimens, DivNeg>& PolyMod<Elem, Dimens, DivNeg>::operator=(const VectPoly<Elem>& poly) {
-    this->VectStat<Elem, Dimens>::operator=(poly);//Appel a la methode de VectStat
+    this->StaticVector<Elem, Dimens>::operator=(poly);//Appel a la methode de StaticVector
     _deg = poly.deg();
     _degModified = false; //Degre mis a jour
     return *this;
 }
 /**assignation a vecteur statique**/
 template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
-PolyMod<Elem, Dimens, DivNeg>& PolyMod<Elem, Dimens, DivNeg>::operator=(const VectStat<Elem, Dimens>& vect)
+PolyMod<Elem, Dimens, DivNeg>& PolyMod<Elem, Dimens, DivNeg>::operator=(const StaticVector<Elem, Dimens>& vect)
 {
-    this->VectStat<Elem, Dimens>::operator=(vect);//Appel a la methode de VectStat
+    this->StaticVector<Elem, Dimens>::operator=(vect);//Appel a la methode de StaticVector
     this->evalDeg(); //Met degre a jour
     return *this;
 }
@@ -128,7 +128,7 @@ PolyMod<Elem, Dimens, DivNeg>& PolyMod<Elem, Dimens, DivNeg>::operator=(const Ve
 template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
 PolyMod<Elem, Dimens, DivNeg>& PolyMod<Elem, Dimens, DivNeg>::operator=(const PolyMod<Elem, Dimens, DivNeg>& poly)
 {
-    this->VectStat<Elem, Dimens>::operator=(poly);//Appel a la methode de VectStat
+    this->StaticVector<Elem, Dimens>::operator=(poly);//Appel a la methode de StaticVector
     _deg = poly.deg();
     _degModified = false; //Degre mis a jour
     return *this;
@@ -138,7 +138,7 @@ PolyMod<Elem, Dimens, DivNeg>& PolyMod<Elem, Dimens, DivNeg>::operator=(const Po
 template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
 PolyMod<Elem, Dimens, DivNeg>& PolyMod<Elem, Dimens, DivNeg>::operator=(Vector<Elem>&& vect)
 {
-    this->VectStat<Elem, Dimens>::operator=(vect);//Appel a la methode de VectStat
+    this->StaticVector<Elem, Dimens>::operator=(vect);//Appel a la methode de StaticVector
     this->evalDeg(); //Met degre a jour
     return *this;
 }
@@ -146,16 +146,16 @@ PolyMod<Elem, Dimens, DivNeg>& PolyMod<Elem, Dimens, DivNeg>::operator=(Vector<E
 template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
 PolyMod<Elem, Dimens, DivNeg>& PolyMod<Elem, Dimens, DivNeg>::operator=(VectPoly<Elem>&& poly)
 {
-    this->VectStat<Elem, Dimens>::operator=(poly);//Appel a la methode de VectStat
+    this->StaticVector<Elem, Dimens>::operator=(poly);//Appel a la methode de StaticVector
     _deg = poly.deg();
     _degModified = false; //Degre mis a jour
     return *this;
 }
 /**transfert d'un vecteur statique**/
 template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
-PolyMod<Elem, Dimens, DivNeg>& PolyMod<Elem, Dimens, DivNeg>::operator=(VectStat<Elem, Dimens>&& vect)
+PolyMod<Elem, Dimens, DivNeg>& PolyMod<Elem, Dimens, DivNeg>::operator=(StaticVector<Elem, Dimens>&& vect)
 {
-    this->VectStat<Elem, Dimens>::operator=(vect);//Appel a la methode de VectStat
+    this->StaticVector<Elem, Dimens>::operator=(vect);//Appel a la methode de StaticVector
     this->evalDeg(); //Met degre a jour
     return *this;
 }
@@ -163,7 +163,7 @@ PolyMod<Elem, Dimens, DivNeg>& PolyMod<Elem, Dimens, DivNeg>::operator=(VectStat
 template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
 PolyMod<Elem, Dimens, DivNeg>& PolyMod<Elem, Dimens, DivNeg>::operator=(PolyMod<Elem, Dimens, DivNeg>&& poly)
 {
-    this->VectStat<Elem, Dimens>::operator=(poly);//Appel a la methode de VectStat
+    this->StaticVector<Elem, Dimens>::operator=(poly);//Appel a la methode de StaticVector
     _deg = poly.deg();
     _degModified = false; //Degre mis a jour
     return *this;
@@ -174,7 +174,7 @@ PolyMod<Elem, Dimens, DivNeg>& PolyMod<Elem, Dimens, DivNeg>::operator=(PolyMod<
 template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
 void PolyMod<Elem, Dimens, DivNeg>::operator+=(const Vector<Elem>& vect)
 {
-    this->VectStat<Elem, Dimens>::operator+=(vect); //Appelle op. += de VectStat
+    this->StaticVector<Elem, Dimens>::operator+=(vect); //Appelle op. += de StaticVector
     this->evalDeg(); //Met degre a jour
 }
 
@@ -182,7 +182,7 @@ void PolyMod<Elem, Dimens, DivNeg>::operator+=(const Vector<Elem>& vect)
 template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
 void PolyMod<Elem, Dimens, DivNeg>::operator-=(const Vector<Elem>& vect)
 {
-    this->VectStat<Elem, Dimens>::operator-=(vect); //Appelle op. -= de VectStat
+    this->StaticVector<Elem, Dimens>::operator-=(vect); //Appelle op. -= de StaticVector
     this->evalDeg(); //Met degre a jour
 }
 
