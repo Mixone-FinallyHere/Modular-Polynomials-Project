@@ -119,4 +119,18 @@ void StaticVector< T, s >::setSize( unsigned int size )
 	Vector< T >::setSize( size );
 }
 
+// Out of class
+template<typename T, unsigned int s>
+StaticVector<T, s> operator+(const StaticVector<T, s>& vect) {
+    StaticVector<T, s> newVect(vect);
+    newVect.unary_plus();
+    return newVect;
+}
+
+template<typename T, unsigned int s>
+StaticVector<T, s> operator-(const StaticVector<T, s>& vect) {
+    StaticVector<T, s> newVect(vect);
+    newVect.unary_minus();
+    return newVect;
+}
 #endif // _STATICVECTOR_H_
