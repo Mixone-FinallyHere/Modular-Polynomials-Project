@@ -5,288 +5,167 @@
 #include <stdexcept>
 
 #include "polynomialvector.hpp"
-#include "dynamipolynomial.hpp"
 #include "staticvector.hpp"
 
+// Miguel Terol Espino
+// 000356914
+// mteroles@ulb.ac.be
 
+template<typename T>
+using Divisor = const Polynomial<T>&;
+// Template wont accept Polynomial as template param so we are setting it up as a typename
+// as with std basically
 
-template <typename T>
-using PolyDiv = const PolyDyn<T>&;
+template <typename T, unsigned int s, Divisor<T> model>
+class ModularPolynomial: public Polynomial<T>, public StaticVector<T, s> {
+protected:
+    using Polynomial<T>::m_size;
+    using Polynomial<T>::_degree;
+    using Polynomial<T>::m_content;
 
-template <typename T, unsigned int s, PolyDiv<T> DivNeg>
-class ModularPolynomial: public Polynomial<T>, public StaticVector<T, s>
-{
- protected:
-  using Polynomial<T>::_dim;
-  using Polynomial<T>::_deg;
-  using Polynomial<T>::_values;
-  using Polynomial<T>::_degModified;
+public:
+    explicit ModularPolynomial(const T&);
+    ModularPolynomial(const ModularPolynomial<T, s, model>&);
+    explicit ModularPolynomial(const Polynomial<T>&);
 
- public:
+    virtual ModularPolynomial<T, s, model>& operator=(const Vector<T>&) override;
+    virtual ModularPolynomial<T, s, model>& operator=(const Polynomial<T>&) override;
+    virtual ModularPolynomial<T, s, model>& operator=(const StaticVector<T, s>&) override;
+    virtual ModularPolynomial<T, s, model>& operator=(const ModularPolynomial<T, s, model>&);
 
-        ModularPolynomial();
-        explicit ModularPolynomial(const T&);
-        explicit ModularPolynomial(const T*);
-        ModularPolynomial(const ModularPolynomial<T, s, DivNeg>&);
-        ModularPolynomial(ModularPolynomial<T, s, DivNeg>&&);
-        explicit ModularPolynomial(const Polynomial<T>&);
+    virtual void operator+=(const Vector<T>&) override;
+    virtual void operator-=(const Vector<T>&) override;
 
+    using Polynomial<T>::operator*=;
+    void operator*=(const Polynomial<T>&) override;
 
-
-
-
-  virtual ModularPolynomial<T, s, DivNeg>& operator=(const Vector<T>&) override;
-  virtual ModularPolynomial<T, s, DivNeg>& operator=(Vector<T>&&) override;
-  virtual ModularPolynomial<T, s, DivNeg>& operator=(const Polynomial<T>&) override;
-  virtual ModularPolynomial<T, s, DivNeg>& operator=(Polynomial<T>&&) override;
-  virtual ModularPolynomial<T, s, DivNeg>& operator=(const StaticVector<T, s>&) override;
-  virtual ModularPolynomial<T, s, DivNeg>& operator=(StaticVector<T, s>&&) override;
-  virtual ModularPolynomial<T, s, DivNeg>& operator=(const ModularPolynomial<T, s, DivNeg>&);
-  virtual ModularPolynomial<T, s, DivNeg>& operator=(ModularPolynomial<T, s, DivNeg>&&);
-
-
-  virtual void operator+=(const Vector<T>&) override;
-        virtual void operator-=(const Vector<T>&) override;
-
-
-  using Polynomial<T>::operator*=;
-  void operator*=(const Polynomial<T>&) override;
+    using Polynomial<T>::operator[];
 };
 
+// Constructors
+template <typename T, unsigned int s, Divisor<T> model>
+ModularPolynomial<T, s, model>::ModularPolynomial(const T& element): Vector<T>(element, s), Polynomial<T>(element, s), StaticVector<T, s>(element) {}
 
+template <typename T, unsigned int s, Divisor<T> model>
+ModularPolynomial<T, s, model>::ModularPolynomial(const ModularPolynomial<T, s, model>& poly): Vector<T>(poly), Polynomial<T>(poly), StaticVector<T, s>(poly) {}
 
+template <typename T, unsigned int s, Divisor<T> model>
+ModularPolynomial<T, s, model>::ModularPolynomial(const Polynomial<T>& poly): Vector<T>(poly), Polynomial<T>(poly), StaticVector<T, s>(static_cast<StaticVector<T, s>>(poly)) {}
 
+// Operators
+template <typename T, unsigned int s, Divisor<T> model>
+ModularPolynomial<T, s, model>& ModularPolynomial<T, s, model>::operator=(const Vector<T>& vect) {
+    this->Vector<T>::operator=(vect);
+    this->evalDeg();
+    return *this;
+}
 
+template <typename T, unsigned int s, Divisor<T> model>
+ModularPolynomial<T, s, model>& ModularPolynomial<T, s, model>::operator=(const Polynomial<T>& poly) {
+    this->Vector<T>::operator=(poly);
+    _degree = poly.getDeg();
+    return *this;
+}
 
-template <typename T, unsigned int s, PolyDiv<T> DivNeg>
-ModularPolynomial<T, s, DivNeg>::ModularPolynomial():
- Vector<T>(),
- Polynomial<T>(),
- StaticVector<T, s>() {}
-
-template <typename T, unsigned int s, PolyDiv<T> DivNeg>
-ModularPolynomial<T, s, DivNeg>::ModularPolynomial(const T& element):
-    Vector<T>(element, s),
-    Polynomial<T>(element, s),
-    StaticVector<T, s>(element) {}
-
-template <typename T, unsigned int s, PolyDiv<T> DivNeg>
-ModularPolynomial<T, s, DivNeg>::ModularPolynomial(const T* elemArray):
-    Vector<T>(elemArray, s),
-    Polynomial<T>(elemArray, s),
-    StaticVector<T, s>(elemArray) {}
-
-
-template <typename T, unsigned int s, PolyDiv<T> DivNeg>
-ModularPolynomial<T, s, DivNeg>::ModularPolynomial(const ModularPolynomial<T, s, DivNeg>& poly):
-    Vector<T>(poly),
-    Polynomial<T>(poly),
-    StaticVector<T, s>(poly) {}
-
-
-template <typename T, unsigned int s, PolyDiv<T> DivNeg>
-ModularPolynomial<T, s, DivNeg>::ModularPolynomial(ModularPolynomial<T, s, DivNeg>&& poly):
-    Vector<T>(std::forward<ModularPolynomial<T, s, DivNeg>>(poly)),
-    Polynomial<T>(std::forward<ModularPolynomial<T, s, DivNeg>>(poly)),
-    StaticVector<T, s>(std::forward<ModularPolynomial<T, s, DivNeg>>(poly)) {}
-
-
-template <typename T, unsigned int s, PolyDiv<T> DivNeg>
-ModularPolynomial<T, s, DivNeg>::ModularPolynomial(const Polynomial<T>& poly):
-    Vector<T>(poly),
-    Polynomial<T>(poly),
-    StaticVector<T, s>(static_cast<StaticVector<T, s>>(poly)) {}
-
-
-
-
-
-template <typename T, unsigned int s, PolyDiv<T> DivNeg>
-ModularPolynomial<T, s, DivNeg>& ModularPolynomial<T, s, DivNeg>::operator=(const Vector<T>& vect)
-{
+template <typename T, unsigned int s, Divisor<T> model>
+ModularPolynomial<T, s, model>& ModularPolynomial<T, s, model>::operator=(const StaticVector<T, s>& vect) {
     this->StaticVector<T, s>::operator=(vect);
     this->evalDeg();
     return *this;
 }
 
-template <typename T, unsigned int s, PolyDiv<T> DivNeg>
-ModularPolynomial<T, s, DivNeg>& ModularPolynomial<T, s, DivNeg>::operator=(const Polynomial<T>& poly) {
+template <typename T, unsigned int s, Divisor<T> model>
+ModularPolynomial<T, s, model>& ModularPolynomial<T, s, model>::operator=(const ModularPolynomial<T, s, model>& poly) {
     this->StaticVector<T, s>::operator=(poly);
-    _deg = poly.deg();
-    _degModified = false;
+    _degree = poly.getDeg();
     return *this;
 }
 
-template <typename T, unsigned int s, PolyDiv<T> DivNeg>
-ModularPolynomial<T, s, DivNeg>& ModularPolynomial<T, s, DivNeg>::operator=(const StaticVector<T, s>& vect)
-{
-    this->StaticVector<T, s>::operator=(vect);
-    this->evalDeg();
-    return *this;
-}
-
-template <typename T, unsigned int s, PolyDiv<T> DivNeg>
-ModularPolynomial<T, s, DivNeg>& ModularPolynomial<T, s, DivNeg>::operator=(const ModularPolynomial<T, s, DivNeg>& poly)
-{
-    this->StaticVector<T, s>::operator=(poly);
-    _deg = poly.deg();
-    _degModified = false;
-    return *this;
-}
-
-
-template <typename T, unsigned int s, PolyDiv<T> DivNeg>
-ModularPolynomial<T, s, DivNeg>& ModularPolynomial<T, s, DivNeg>::operator=(Vector<T>&& vect)
-{
-    this->StaticVector<T, s>::operator=(vect);
-    this->evalDeg();
-    return *this;
-}
-
-template <typename T, unsigned int s, PolyDiv<T> DivNeg>
-ModularPolynomial<T, s, DivNeg>& ModularPolynomial<T, s, DivNeg>::operator=(Polynomial<T>&& poly)
-{
-    this->StaticVector<T, s>::operator=(poly);
-    _deg = poly.deg();
-    _degModified = false;
-    return *this;
-}
-
-template <typename T, unsigned int s, PolyDiv<T> DivNeg>
-ModularPolynomial<T, s, DivNeg>& ModularPolynomial<T, s, DivNeg>::operator=(StaticVector<T, s>&& vect)
-{
-    this->StaticVector<T, s>::operator=(vect);
-    this->evalDeg();
-    return *this;
-}
-
-template <typename T, unsigned int s, PolyDiv<T> DivNeg>
-ModularPolynomial<T, s, DivNeg>& ModularPolynomial<T, s, DivNeg>::operator=(ModularPolynomial<T, s, DivNeg>&& poly)
-{
-    this->StaticVector<T, s>::operator=(poly);
-    _deg = poly.deg();
-    _degModified = false;
-    return *this;
-}
-
-
-
-template <typename T, unsigned int s, PolyDiv<T> DivNeg>
-void ModularPolynomial<T, s, DivNeg>::operator+=(const Vector<T>& vect)
-{
+template <typename T, unsigned int s, Divisor<T> model>
+void ModularPolynomial<T, s, model>::operator+=(const Vector<T>& vect) {
     this->StaticVector<T, s>::operator+=(vect);
     this->evalDeg();
 }
 
 
-template <typename T, unsigned int s, PolyDiv<T> DivNeg>
-void ModularPolynomial<T, s, DivNeg>::operator-=(const Vector<T>& vect)
-{
+template <typename T, unsigned int s, Divisor<T> model>
+void ModularPolynomial<T, s, model>::operator-=(const Vector<T>& vect) {
     this->StaticVector<T, s>::operator-=(vect);
     this->evalDeg();
 }
 
 
-template <typename T, unsigned int s, PolyDiv<T> DivNeg>
-void ModularPolynomial<T, s, DivNeg>::operator*=(const Polynomial<T>& other)
-{
-
- T* oldValues = _values;
- _values = new T[s];
- int otherDeg = other.deg();
- int thisDeg = this->deg();
-
-
-    int newDeg = _deg < 0 || otherDeg < 0 ? -1 : thisDeg + otherDeg;
-    int DimInt = static_cast<int>(s);
-
-
-    for (int i=0; i<DimInt && i<=newDeg; ++i)
-    {
-        _values[i] = 0;
-
-        for (int j=(i>otherDeg ? i-otherDeg : 0); j<=i && j<=_deg; j++)
-        {
-
-   _values[i] += oldValues[j] * other[i-j];
+template <typename T, unsigned int s, Divisor<T> model> // From project set up by profesor
+void ModularPolynomial<T, s, model>::operator*=(const Polynomial<T>& other) {
+    T* oldValues = m_content;
+    m_content = new T[s];
+    int otherDeg = other.getDeg();
+    int myDeg = this->getDeg();
+    int newDeg = _degree < 0 || otherDeg < 0 ? -1 : myDeg + otherDeg;
+    int wantDimen = static_cast<int>(s);
+    for (int i=0; i<wantDimen && i<=newDeg; ++i) {
+        m_content[i] = 0;
+        for (int j=(i>otherDeg ? i-otherDeg : 0); j<=i && j<=_degree; j++) {
+            m_content[i] += oldValues[j] * other[i-j];
         }
     }
-
-
- PolyDyn<T> DivMod(DivNeg);
-    for (int i=DimInt; i<=newDeg; ++i)
-    {
+    Polynomial<T> modulator(model);
+    for (int i=wantDimen; i<=newDeg; ++i) {
         T mMultip=0;
-
-
-        for (int j=i-otherDeg; j<= thisDeg; ++j) mMultip += oldValues[j] * other[i-j];
-
-
-  for (int j=0; j<DimInt; j++) _values[j] += mMultip * DivMod[j];
-
-
-  T greatestCoeff = DivMod[s-1];
-        for (int j=DimInt-1; j>0; j--)
-        {
-   DivMod[j] = DivMod[j-1];
-   DivMod[j] += greatestCoeff * DivNeg[j];
+        for (int j=i-otherDeg; j<= myDeg; ++j) mMultip += oldValues[j] * other[i-j];
+        for (int j=0; j<wantDimen; j++) m_content[j] += mMultip * modulator[j];
+        T greatestCoeff = modulator[s-1];
+        for (int j=wantDimen-1; j>0; j--) {
+            modulator[j] = modulator[j-1];
+            modulator[j] += greatestCoeff * model[j];
         }
-        DivMod[0] = greatestCoeff * DivNeg[0];
+        modulator[0] = greatestCoeff * model[0];
     }
-    if (newDeg < DimInt)
-    {
-  for (int i = newDeg+1; i<DimInt; ++i) _values[i] = 0;
-  _deg = newDeg;
-  _degModified = false;
-    }
-    else this->evalDeg();
+    if (newDeg < wantDimen) {
+        for (int i = newDeg+1; i<wantDimen; ++i) m_content[i] = 0;
+        _degree = newDeg;
+    } else this->evalDeg();
     delete[] oldValues;
 }
 
+// Out of class operators
+// Most are exactly like Polynomial but have to be overriden to avoid clash with SaticVector methods
 
-
-
-
-template <typename T, unsigned int s, PolyDiv<T> DivNeg>
-ModularPolynomial<T, s, DivNeg> operator+(const ModularPolynomial<T, s, DivNeg>& polyA, const ModularPolynomial<T, s, DivNeg>& polyB)
-{
- ModularPolynomial<T, s, DivNeg> resPoly(polyA);
-    resPoly += polyB;
-    return resPoly;
+template <typename T, unsigned int s, Divisor<T> model>
+ModularPolynomial<T, s, model> operator+(const ModularPolynomial<T, s, model>& polyA, const ModularPolynomial<T, s, model>& polyB) {
+    ModularPolynomial<T, s, model> polyC(polyA);
+    polyC += polyB;
+    return polyC;
 }
 
 
-template <typename T, unsigned int s, PolyDiv<T> DivNeg>
-ModularPolynomial<T, s, DivNeg> operator-(const ModularPolynomial<T, s, DivNeg>& polyA, const ModularPolynomial<T, s, DivNeg>& polyB)
-{
-    ModularPolynomial<T, s, DivNeg> resPoly(polyA);
-    resPoly += polyB;
-    return resPoly;
+template <typename T, unsigned int s, Divisor<T> model>
+ModularPolynomial<T, s, model> operator-(const ModularPolynomial<T, s, model>& polyA, const ModularPolynomial<T, s, model>& polyB) {
+    ModularPolynomial<T, s, model> polyC(polyA);
+    polyC += polyB;
+    return polyC;
 }
 
 
-template <typename T, unsigned int s, PolyDiv<T> DivNeg>
-ModularPolynomial<T, s, DivNeg> operator*(const ModularPolynomial<T, s, DivNeg>& polyA, const ModularPolynomial<T, s, DivNeg>& polyB)
-{
-    ModularPolynomial<T, s, DivNeg> resPoly(polyA);
-    resPoly *= polyB;
-    return resPoly;
+template <typename T, unsigned int s, Divisor<T> model>
+ModularPolynomial<T, s, model> operator*(const ModularPolynomial<T, s, model>& polyA, const ModularPolynomial<T, s, model>& polyB) {
+    ModularPolynomial<T, s, model> polyC(polyA);
+    polyC *= polyB;
+    return polyC;
 }
 
 
-template <typename T, unsigned int s, PolyDiv<T> DivNeg>
-ModularPolynomial<T, s, DivNeg> operator+(const ModularPolynomial<T, s, DivNeg>& poly)
-{
-    ModularPolynomial<T, s, DivNeg> newPoly(poly);
+template <typename T, unsigned int s, Divisor<T> model>
+ModularPolynomial<T, s, model> operator+(const ModularPolynomial<T, s, model>& poly) {
+    ModularPolynomial<T, s, model> newPoly(poly);
     newPoly.unary_plus();
     return newPoly;
 }
 
 
-template <typename T, unsigned int s, PolyDiv<T> DivNeg>
-ModularPolynomial<T, s, DivNeg> operator-(const ModularPolynomial<T, s, DivNeg>& poly)
-{
-    ModularPolynomial<T, s, DivNeg> newPoly(poly);
+template <typename T, unsigned int s, Divisor<T> model>
+ModularPolynomial<T, s, model> operator-(const ModularPolynomial<T, s, model>& poly) {
+    ModularPolynomial<T, s, model> newPoly(poly);
     newPoly.unary_minus();
     return newPoly;
 }

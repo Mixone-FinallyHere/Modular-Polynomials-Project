@@ -3,6 +3,10 @@
 
 #include "vector.hpp"
 
+// Miguel Terol Espino
+// 000356914
+// mteroles@ulb.ac.be
+
 template< typename T, unsigned int s >
 class StaticVector : public virtual Vector<T> {
 public:

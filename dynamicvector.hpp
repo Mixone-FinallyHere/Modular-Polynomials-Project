@@ -1,7 +1,11 @@
 #ifndef _DYNAMICVECTOR_H_
 #define _DYNAMICVECTOR_H_
 
-#include "Vector.hpp"
+#include "vector.hpp"
+
+// Miguel Terol Espino
+// 000356914
+// mteroles@ulb.ac.be
 
 template< typename T >
 class DynamicVector : public virtual Vector<T> {
@@ -30,6 +34,16 @@ DynamicVector< T >::~DynamicVector() {
 template< typename T >
 DynamicVector< T >::DynamicVector( int size ) {
 	setSize(size);
+}
+
+template< typename T >
+DynamicVector< T >::DynamicVector( const T& element, unsigned int size ) {
+    std::cout << "Element to repeat: " << element << std::endl;
+	this->m_size=size;
+	this->m_content = new T[size];
+	for (unsigned int i=0; i<size; ++i) {
+		this->m_content[i] = element;
+	}
 }
 
 template <typename T>

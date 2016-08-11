@@ -4,10 +4,13 @@
 #include <iostream>
 #include <string>
 #include <typeinfo>
-#include <cxxabi.h>
 
 // Default clear of Vector value
 #define CLEAR_VALUE 0
+
+// Miguel Terol Espino
+// 000356914
+// mteroles@ulb.ac.be
 
 template< typename T >
 class Vector {
@@ -47,9 +50,12 @@ Vector< T >::Vector(): m_size( 0 ), m_content(NULL){}
 
 // Repeat same element
 template <typename T>
-Vector<T>::Vector(const T& element, unsigned int dim):	m_size(dim), m_content(new T[dim]) {
+Vector<T>::Vector(const T& element, unsigned int dim) {
+	std::cout << "Element to repeat: " << element << std::endl;
+	this->m_size=dim;
+	this->m_content = new T[dim];
 	for (unsigned int i=0; i<dim; ++i) {
-		m_content[i] = element;
+		this->m_content[i] = element;
 	}
 }
 
@@ -135,7 +141,7 @@ void Vector<T>::unary_minus () {
 template< typename T >
 std::ostream & operator<<( std::ostream & ostr, const Vector< T > & vector ) {
     // Get name of derived class calling output
-	ostr <<  typeid(vector).name() << " vector contains => [ ";
+	ostr <<  typeid(vector).name() << " vector contains => [ "; // Long live typeinfo
 	for ( int i = 0; i < vector.getSize(); i++ ) {
         ostr << vector[i];
         if (i < vector.getSize()-1)	ostr << ", ";
@@ -145,7 +151,7 @@ std::ostream & operator<<( std::ostream & ostr, const Vector< T > & vector ) {
 }
 
 template< typename T >
-std::istream & operator>>( std::istream & input, Vector< T > & vector ) {
+std::istream& operator>>( std::istream & input, Vector< T > & vector ) {
     // Get name of derived class calling output
 	std::cout <<  typeid(vector).name() << " vector of size " << vector.getSize() << " input:" << std::endl;
 	for ( int i = 0; i < vector.getSize(); i++ ) {
