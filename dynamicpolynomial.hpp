@@ -1,3 +1,4 @@
+# 1 "dynamicpolynomial.hpp"
 #ifndef POLYDYN_H
 #define POLYDYN_H
 
@@ -7,271 +8,263 @@
 #include "polynomialvector.hpp"
 #include "dynamicvector.hpp"
 
-
-
-
-template <typename Elem>
-class PolyDyn: public VectPoly<Elem>, public DynamicVector<Elem>
+template <typename T>
+class PolyDyn: public Polynomial<T>, public DynamicVector<T>
 {
-	protected:
-		using VectPoly<Elem>::_dim;
-		using VectPoly<Elem>::_deg;
-		using VectPoly<Elem>::_values;
-		using VectPoly<Elem>::_degModified;
+ protected:
+  using Polynomial<T>::_dim;
+  using Polynomial<T>::_deg;
+  using Polynomial<T>::_values;
+  using Polynomial<T>::_degModified;
 
-	public:
-		/**Constructeurs**/
-        PolyDyn();							//trivial
-        PolyDyn(const Elem&, std::size_t);	//init: valeur + taille
-        PolyDyn(const Elem*, std::size_t);	//init: tableau valeurs + taille
-        PolyDyn(const PolyDyn<Elem>&);		//de copie
-        PolyDyn(PolyDyn<Elem>&&);			//de transfert
-        PolyDyn(const VectPoly<Elem>&);		//de conversion
+ public:
 
-        /**Destructeur**/
-        //Pas besoin de destructeur autre que celui de classe de base
+        PolyDyn();
+        PolyDyn(const T&, unsigned int);
+        PolyDyn(const T*, unsigned int);
+        PolyDyn(const PolyDyn<T>&);
+        PolyDyn(PolyDyn<T>&&);
+        PolyDyn(const Polynomial<T>&);
+  virtual PolyDyn<T>& operator=(const Vector<T>&) override;
+  virtual PolyDyn<T>& operator=(Vector<T>&&) override;
+  virtual PolyDyn<T>& operator=(const Polynomial<T>&) override;
+  virtual PolyDyn<T>& operator=(Polynomial<T>&&) override;
+  virtual PolyDyn<T>& operator=(const DynamicVector<T>&) override;
+  virtual PolyDyn<T>& operator=(DynamicVector<T>&&) override;
+  virtual PolyDyn<T>& operator=(const PolyDyn<T>&);
+  virtual PolyDyn<T>& operator=(PolyDyn<T>&&);
 
-		/**Operateurs**/
-		virtual PolyDyn<Elem>& operator=(const Vector<Elem>&) override;		//=Vector (redefini)
-		virtual PolyDyn<Elem>& operator=(Vector<Elem>&&) override;
-		virtual PolyDyn<Elem>& operator=(const VectPoly<Elem>&) override;	//=VectPoly (redefini)
-		virtual PolyDyn<Elem>& operator=(VectPoly<Elem>&&) override;
-		virtual PolyDyn<Elem>& operator=(const DynamicVector<Elem>&) override;	//=DynamicVector (redefini)
-		virtual PolyDyn<Elem>& operator=(DynamicVector<Elem>&&) override;
-		virtual PolyDyn<Elem>& operator=(const PolyDyn<Elem>&);		//=PolyDyn (copie)
-		virtual PolyDyn<Elem>& operator=(PolyDyn<Elem>&&);
+  virtual void operator+=(const Vector<T>&) override;
+        virtual void operator-=(const Vector<T>&) override;
 
-		virtual void operator+=(const Vector<Elem>&) override;	//Addition d'un vecteur (idem pour polynomes)
-        virtual void operator-=(const Vector<Elem>&) override;	//Soustraction d'un vecteur
-
-		using VectPoly<Elem>::operator*=; //Multiplication par element
-		void operator*=(const VectPoly<Elem>&) override; //Multiplication par polynome
+  using Polynomial<T>::operator*=;
+  void operator*=(const Polynomial<T>&) override;
 };
 
 
-/**--------------------CONSTRUCTEURS**/
-
-/**initialisants**/
-template <typename Elem>
-PolyDyn<Elem>::PolyDyn():
-	Vector<Elem>(),
-	VectPoly<Elem>(),
-	DynamicVector<Elem>() {} //Ctr par defaut (trivial): polynome nul
-
-template <typename Elem>
-PolyDyn<Elem>::PolyDyn(const Elem& element, std::size_t dim):
-    Vector<Elem>(element, dim),
-    VectPoly<Elem>(element, dim),
-    DynamicVector<Elem>(element, dim) {} //Ctr correspondants de classes parentes
-
-template <typename Elem>
-PolyDyn<Elem>::PolyDyn(const Elem* elemArray, std::size_t dim):
-    Vector<Elem>(elemArray, dim),
-    VectPoly<Elem>(elemArray, dim),
-    DynamicVector<Elem>(elemArray, dim) {} //Ctr correspondants de classes parentes
-
-/**de copie**/
-template <typename Elem>
-PolyDyn<Elem>::PolyDyn(const PolyDyn<Elem>& poly):
-    Vector<Elem>(poly),
-    VectPoly<Elem>(poly),
-    DynamicVector<Elem>(poly) {} //Appelle ctrs. copie
-
-/**de transfert**/
-template <typename Elem>
-PolyDyn<Elem>::PolyDyn(PolyDyn<Elem>&& poly):
-    Vector<Elem>(std::forward<VectPoly<Elem>>(poly)),
-    VectPoly<Elem>(std::forward<VectPoly<Elem>>(poly)),
-    DynamicVector<Elem>(std::forward<VectPoly<Elem>>(poly)) {} //Appelle ctrs. transfert
-
-/**de conversion**/
-template <typename Elem>
-PolyDyn<Elem>::PolyDyn(const VectPoly<Elem>& vect):
-	Vector<Elem>(vect), VectPoly<Elem>(vect), DynamicVector<Elem>(vect) {} //Conversion: copie & evalue degre
 
 
 
-/**--------------------OPERATEURS**/
+template <typename T>
+PolyDyn<T>::PolyDyn():
+ Vector<T>(),
+ Polynomial<T>(),
+ DynamicVector<T>() {}
 
-/**assignation a vecteur**/
-template <typename Elem>
-PolyDyn<Elem>& PolyDyn<Elem>::operator=(const Vector<Elem>& vect)
+template <typename T>
+PolyDyn<T>::PolyDyn(const T& element, unsigned int dim):
+    Vector<T>(element, dim),
+    Polynomial<T>(element, dim),
+    DynamicVector<T>(element, dim) {}
+
+template <typename T>
+PolyDyn<T>::PolyDyn(const T* elemArray, unsigned int dim):
+    Vector<T>(elemArray, dim),
+    Polynomial<T>(elemArray, dim),
+    DynamicVector<T>(elemArray, dim) {}
+
+
+template <typename T>
+PolyDyn<T>::PolyDyn(const PolyDyn<T>& poly):
+    Vector<T>(poly),
+    Polynomial<T>(poly),
+    DynamicVector<T>(poly) {}
+
+
+template <typename T>
+PolyDyn<T>::PolyDyn(PolyDyn<T>&& poly):
+    Vector<T>(std::forward<Polynomial<T>>(poly)),
+    Polynomial<T>(std::forward<Polynomial<T>>(poly)),
+    DynamicVector<T>(std::forward<Polynomial<T>>(poly)) {}
+
+
+template <typename T>
+PolyDyn<T>::PolyDyn(const Polynomial<T>& vect):
+ Vector<T>(vect), Polynomial<T>(vect), DynamicVector<T>(vect) {}
+
+
+
+
+
+
+template <typename T>
+PolyDyn<T>& PolyDyn<T>::operator=(const Vector<T>& vect)
 {
-    this->DynamicVector<Elem>::operator=(vect);//Appelle op. de copie de DynamicVector
-    this->evalDeg(); //Met degre a jour
+    this->DynamicVector<T>::operator=(vect);
+    this->evalDeg();
     return *this;
 }
-/**assignation a vecteur polynome**/
-template <typename Elem>
-PolyDyn<Elem>& PolyDyn<Elem>::operator=(const VectPoly<Elem>& poly)
+
+template <typename T>
+PolyDyn<T>& PolyDyn<T>::operator=(const Polynomial<T>& poly)
 {
-    this->DynamicVector<Elem>::operator=(poly);//Appelle op. de copie de DynamicVector
+    this->DynamicVector<T>::operator=(poly);
     _deg = poly.deg();
-    _degModified = false; //Degre mis a jour
-	return *this;
+    _degModified = false;
+ return *this;
 }
-/**assignation a vecteur dynamique**/
-template <typename Elem>
-PolyDyn<Elem>& PolyDyn<Elem>::operator=(const DynamicVector<Elem>& vect)
+
+template <typename T>
+PolyDyn<T>& PolyDyn<T>::operator=(const DynamicVector<T>& vect)
 {
-    this->DynamicVector<Elem>::operator=(vect);//Appelle op. de copie de DynamicVector
-    this->evalDeg(); //Met degre a jour
+    this->DynamicVector<T>::operator=(vect);
+    this->evalDeg();
     return *this;
 }
-/**assignation a polynome dynamique**/
-template <typename Elem>
-PolyDyn<Elem>& PolyDyn<Elem>::operator=(const PolyDyn<Elem>& poly)
+
+template <typename T>
+PolyDyn<T>& PolyDyn<T>::operator=(const PolyDyn<T>& poly)
 {
-    this->DynamicVector<Elem>::operator=(poly);//Appelle op. de copie de DynamicVector
+    this->DynamicVector<T>::operator=(poly);
     _deg = poly.deg();
-    _degModified = false; //Degre mis a jour
+    _degModified = false;
     return *this;
 }
 
 
-/**transfert d'un vecteur**/
-template <typename Elem>
-PolyDyn<Elem>& PolyDyn<Elem>::operator=(Vector<Elem>&& vect)
+
+template <typename T>
+PolyDyn<T>& PolyDyn<T>::operator=(Vector<T>&& vect)
 {
-    this->DynamicVector<Elem>::operator=(std::move(vect));//Appelle op. transfert de DynamicVector
-    this->evalDeg(); //Met degre a jour
+    this->DynamicVector<T>::operator=(std::move(vect));
+    this->evalDeg();
     return *this;
 }
-/**transfert d'un vecteur polynome**/
-template <typename Elem>
-PolyDyn<Elem>& PolyDyn<Elem>::operator=(VectPoly<Elem>&& poly)
+
+template <typename T>
+PolyDyn<T>& PolyDyn<T>::operator=(Polynomial<T>&& poly)
 {
-    this->DynamicVector<Elem>::operator=(std::move(poly));//Appelle op. transfert de DynamicVector
+    this->DynamicVector<T>::operator=(std::move(poly));
     _deg = poly.deg();
-    _degModified = false; //Degre mis a jour
-	return *this;
+    _degModified = false;
+ return *this;
 }
-/**transfert d'un vecteur dynamique**/
-template <typename Elem>
-PolyDyn<Elem>& PolyDyn<Elem>::operator=(DynamicVector<Elem>&& vect)
+
+template <typename T>
+PolyDyn<T>& PolyDyn<T>::operator=(DynamicVector<T>&& vect)
 {
-    this->DynamicVector<Elem>::operator=(std::move(vect));//Appelle op. transfert de DynamicVector
-    this->evalDeg(); //Met degre a jour
+    this->DynamicVector<T>::operator=(std::move(vect));
+    this->evalDeg();
     return *this;
 }
-/**transfert d'un polynome dynamique**/
-template <typename Elem>
-PolyDyn<Elem>& PolyDyn<Elem>::operator=(PolyDyn<Elem>&& poly)
+
+template <typename T>
+PolyDyn<T>& PolyDyn<T>::operator=(PolyDyn<T>&& poly)
 {
-	this->DynamicVector<Elem>::operator=(std::move(poly));//Appelle op. transfert de DynamicVector
-	_deg = poly.deg();
-	_degModified = false; //Degre mis a jour
-	return *this;
+ this->DynamicVector<T>::operator=(std::move(poly));
+ _deg = poly.deg();
+ _degModified = false;
+ return *this;
 }
 
 
-/**op+= addition d'un Vector<Elem> (idem pour polynome)**/
-template <typename Elem>
-void PolyDyn<Elem>::operator+=(const Vector<Elem>& vect)
-{
-    this->DynamicVector<Elem>::operator+=(vect); //Appelle op. += de DynamicVector
-    this->evalDeg(); //Reevalue degre
-}
 
-/**op-= soustraction d'un Vector<Elem> (idem pour polynome)**/
-template <typename Elem>
-void PolyDyn<Elem>::operator-=(const Vector<Elem>& vect)
+template <typename T>
+void PolyDyn<T>::operator+=(const Vector<T>& vect)
 {
-    this->DynamicVector<Elem>::operator-=(vect); //Appelle op. += de DynamicVector
-    this->evalDeg(); //Reevalue degre
+    this->DynamicVector<T>::operator+=(vect);
+    this->evalDeg();
 }
 
 
-/**op*= multiplication par polynome**/
-template <typename Elem>
-void PolyDyn<Elem>::operator*=(const VectPoly<Elem>& other)
+template <typename T>
+void PolyDyn<T>::operator-=(const Vector<T>& vect)
 {
-	int otherDeg = other.deg();
-	int thisDeg = this->deg();
-	if (thisDeg==-1 or otherDeg==-1) //Resultat forcement nul
-	{
-		Elem* oldValues = _values;
-		_values = new Elem[0];
-		_dim = 0;
-		_deg = -1;
-		delete[] oldValues;
-	}
-	else							//Resultat variable:
-	{
-		if (otherDeg>0) 	//Il FAUT ajuster le degre de this, et on en profite pour ajuster sa dimension
-		{
-			Elem* oldValues = _values;
-			_values = new Elem[thisDeg + otherDeg + 1]; //dimension resultante = degre resultant + 1
+    this->DynamicVector<T>::operator-=(vect);
+    this->evalDeg();
+}
 
-			//Calcul optimise: pas besoin d'initialiser (degres extremes parcourus une seule fois)!
-			for (int j=0; j<=otherDeg; ++j) {_values[j] = oldValues[0] * other[j];} //parcourt premier coeff de this
-			for (int i=1; i<=thisDeg; ++i) //chaque coeff. de this sauf le premier
-			{
-				for (int j=0; j<otherDeg; ++j) //chaque coeff de other sauf le dernier
-				{
-					_values[i+j] += oldValues[i] * other[j]; //ajoute leur produit au coeff. de la somme de leurs degres
-				}
-				_values[i+otherDeg] = oldValues[i] * other[otherDeg]; //parcourt dernier coeff de other
-			}
-			_degModified = false;	//Degre mis a jour
-			_deg = thisDeg + otherDeg; //Nouveau degre
-			_dim = _deg+1; //Nouvelle dim
-			delete[] oldValues; //elimine anciens coeff.
-		}
-		else 				//Dans ce cas les modifications peuvent se faire "sur place"
-		{
-			for (int i=0; i<=_deg; ++i) { _values[i] *= other[0]; }
-		}
+
+
+template <typename T>
+void PolyDyn<T>::operator*=(const Polynomial<T>& other)
+{
+ int otherDeg = other.deg();
+ int thisDeg = this->deg();
+ if (thisDeg==-1 or otherDeg==-1)
+ {
+  T* oldValues = _values;
+  _values = new T[0];
+  _dim = 0;
+  _deg = -1;
+  delete[] oldValues;
+ }
+ else
+ {
+  if (otherDeg>0)
+  {
+   T* oldValues = _values;
+   _values = new T[thisDeg + otherDeg + 1];
+
+
+   for (int j=0; j<=otherDeg; ++j) {_values[j] = oldValues[0] * other[j];}
+   for (int i=1; i<=thisDeg; ++i)
+   {
+    for (int j=0; j<otherDeg; ++j)
+    {
+     _values[i+j] += oldValues[i] * other[j];
+    }
+    _values[i+otherDeg] = oldValues[i] * other[otherDeg];
+   }
+   _degModified = false;
+   _deg = thisDeg + otherDeg;
+   _dim = _deg+1;
+   delete[] oldValues;
+  }
+  else
+  {
+   for (int i=0; i<=_deg; ++i) { _values[i] *= other[0]; }
+  }
     }
 }
 
 
-/**--------------------HORS CLASSE**/
 
-/**addition binaire entre VectPoly<Elem>**/
-template <typename Elem>
-PolyDyn<Elem> operator+(const VectPoly<Elem>& polyA, const VectPoly<Elem>& polyB)
+
+
+template <typename T>
+PolyDyn<T> operator+(const Polynomial<T>& polyA, const Polynomial<T>& polyB)
 {
-    PolyDyn<Elem> resPoly(polyA);//Copie de polyA comme polynome dynamique
+    PolyDyn<T> resPoly(polyA);
     resPoly += polyB;
     return resPoly;
 }
 
-/**soustraction binaire entre VectPoly<Elem>**/
-template <typename Elem>
-PolyDyn<Elem> operator-(const VectPoly<Elem>& polyA, const VectPoly<Elem>& polyB)
+
+template <typename T>
+PolyDyn<T> operator-(const Polynomial<T>& polyA, const Polynomial<T>& polyB)
 {
-    PolyDyn<Elem> resPoly(polyA); //Copie de polyA comme polynome dynamique
+    PolyDyn<T> resPoly(polyA);
     resPoly -= polyB;
     return resPoly;
 }
 
-/**multiplication de VectPoly<Elem>**/
-template <typename Elem>
-PolyDyn<Elem> operator*(const VectPoly<Elem>& polyA, const VectPoly<Elem>& polyB)
+
+template <typename T>
+PolyDyn<T> operator*(const Polynomial<T>& polyA, const Polynomial<T>& polyB)
 {
-    PolyDyn<Elem> resPoly = PolyDyn<Elem>(polyA); //Copie de polyA comme polynome dynamique
+    PolyDyn<T> resPoly = PolyDyn<T>(polyA);
     resPoly *= polyB;
-    return resPoly; //Retourne par valeur (effc++)
+    return resPoly;
 }
 
-/**plus unaire**/
-template <typename Elem>
-PolyDyn<Elem> operator+(const PolyDyn<Elem>& poly)
+
+template <typename T>
+PolyDyn<T> operator+(const PolyDyn<T>& poly)
 {
-    PolyDyn<Elem> newPoly(poly); //Ctr copie
+    PolyDyn<T> newPoly(poly);
     newPoly.unary_plus();
-    return newPoly; //Retourne par valeur (effc++)
+    return newPoly;
 }
 
-/**moins unaire**/
-template <typename Elem>
-PolyDyn<Elem> operator-(const PolyDyn<Elem>& poly)
+
+template <typename T>
+PolyDyn<T> operator-(const PolyDyn<T>& poly)
 {
-    PolyDyn<Elem> newPoly(poly); //Ctr copie
+    PolyDyn<T> newPoly(poly);
     newPoly.unary_minus();
-    return newPoly; //Retourne par valeur (effc++)
+    return newPoly;
 }
 
 
-#endif // POLYDYN_H
+#endif

@@ -10,286 +10,286 @@
 
 
 
-template <typename Elem>
-using PolyDiv = const PolyDyn<Elem>&;//Typedef de PolyDiv "a la C++11" (alias template)
+template <typename T>
+using PolyDiv = const PolyDyn<T>&;
 
-template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
-class PolyMod: public VectPoly<Elem>, public StaticVector<Elem, Dimens>
+template <typename T, unsigned int s, PolyDiv<T> DivNeg>
+class ModularPolynomial: public Polynomial<T>, public StaticVector<T, s>
 {
-	protected:
-		using VectPoly<Elem>::_dim;
-		using VectPoly<Elem>::_deg;
-		using VectPoly<Elem>::_values;
-		using VectPoly<Elem>::_degModified;
+ protected:
+  using Polynomial<T>::_dim;
+  using Polynomial<T>::_deg;
+  using Polynomial<T>::_values;
+  using Polynomial<T>::_degModified;
 
-	public:
-		/**Constructeurs**/
-        PolyMod();				//trivial
-        explicit PolyMod(const Elem&);	// init: valeur (taille parametrique)
-        explicit PolyMod(const Elem*);	// init: tableau valeurs (taille parametrique)
-        PolyMod(const PolyMod<Elem, Dimens, DivNeg>&);	//de copie
-        PolyMod(PolyMod<Elem, Dimens, DivNeg>&&);		//de transfert
-        explicit PolyMod(const VectPoly<Elem>&);		//de conversion
+ public:
 
-        /**Destructeur**/
-        //Pas besoin de destructeur autre que celui de classe de base
-
-		/**Operateurs**/
-		virtual PolyMod<Elem, Dimens, DivNeg>& operator=(const Vector<Elem>&) override;		//=Vector (redefini)
-		virtual PolyMod<Elem, Dimens, DivNeg>& operator=(Vector<Elem>&&) override;
-		virtual PolyMod<Elem, Dimens, DivNeg>& operator=(const VectPoly<Elem>&) override;	//=VectPoly (redefini)
-		virtual PolyMod<Elem, Dimens, DivNeg>& operator=(VectPoly<Elem>&&) override;
-		virtual PolyMod<Elem, Dimens, DivNeg>& operator=(const StaticVector<Elem, Dimens>&) override;	//=StaticVector (redefini)
-		virtual PolyMod<Elem, Dimens, DivNeg>& operator=(StaticVector<Elem, Dimens>&&) override;
-		virtual PolyMod<Elem, Dimens, DivNeg>& operator=(const PolyMod<Elem, Dimens, DivNeg>&);	//=PolyMod (copie)
-		virtual PolyMod<Elem, Dimens, DivNeg>& operator=(PolyMod<Elem, Dimens, DivNeg>&&);
+        ModularPolynomial();
+        explicit ModularPolynomial(const T&);
+        explicit ModularPolynomial(const T*);
+        ModularPolynomial(const ModularPolynomial<T, s, DivNeg>&);
+        ModularPolynomial(ModularPolynomial<T, s, DivNeg>&&);
+        explicit ModularPolynomial(const Polynomial<T>&);
 
 
-		virtual void operator+=(const Vector<Elem>&) override;	//Addition d'un vecteur (idem pour polynomes)
-        virtual void operator-=(const Vector<Elem>&) override;	//Soustraction d'un vecteur
 
 
-		using VectPoly<Elem>::operator*=; //Multiplication par element
-		void operator*=(const VectPoly<Elem>&) override; //Multiplication par polynome
+
+  virtual ModularPolynomial<T, s, DivNeg>& operator=(const Vector<T>&) override;
+  virtual ModularPolynomial<T, s, DivNeg>& operator=(Vector<T>&&) override;
+  virtual ModularPolynomial<T, s, DivNeg>& operator=(const Polynomial<T>&) override;
+  virtual ModularPolynomial<T, s, DivNeg>& operator=(Polynomial<T>&&) override;
+  virtual ModularPolynomial<T, s, DivNeg>& operator=(const StaticVector<T, s>&) override;
+  virtual ModularPolynomial<T, s, DivNeg>& operator=(StaticVector<T, s>&&) override;
+  virtual ModularPolynomial<T, s, DivNeg>& operator=(const ModularPolynomial<T, s, DivNeg>&);
+  virtual ModularPolynomial<T, s, DivNeg>& operator=(ModularPolynomial<T, s, DivNeg>&&);
+
+
+  virtual void operator+=(const Vector<T>&) override;
+        virtual void operator-=(const Vector<T>&) override;
+
+
+  using Polynomial<T>::operator*=;
+  void operator*=(const Polynomial<T>&) override;
 };
 
 
 
-/**--------------------CONSTRUCTEURS**/
-
-/**initialisants**/
-template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
-PolyMod<Elem, Dimens, DivNeg>::PolyMod():
-	Vector<Elem>(),
-	VectPoly<Elem>(),
-	StaticVector<Elem, Dimens>() {} //Ctr par defaut (trivial): polynome nul
-
-template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
-PolyMod<Elem, Dimens, DivNeg>::PolyMod(const Elem& element):
-    Vector<Elem>(element, Dimens),
-    VectPoly<Elem>(element, Dimens),
-    StaticVector<Elem, Dimens>(element) {} //Ctr correspondants de classes parentes
-
-template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
-PolyMod<Elem, Dimens, DivNeg>::PolyMod(const Elem* elemArray):
-    Vector<Elem>(elemArray, Dimens),
-    VectPoly<Elem>(elemArray, Dimens),
-    StaticVector<Elem, Dimens>(elemArray) {} //Ctr correspondants de classes parentes
-
-/**de copie**/
-template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
-PolyMod<Elem, Dimens, DivNeg>::PolyMod(const PolyMod<Elem, Dimens, DivNeg>& poly):
-    Vector<Elem>(poly),
-    VectPoly<Elem>(poly),
-    StaticVector<Elem, Dimens>(poly) {} //Appelle ctrs. copie
-
-/**de transfert**/
-template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
-PolyMod<Elem, Dimens, DivNeg>::PolyMod(PolyMod<Elem, Dimens, DivNeg>&& poly):
-    Vector<Elem>(std::forward<PolyMod<Elem, Dimens, DivNeg>>(poly)),
-    VectPoly<Elem>(std::forward<PolyMod<Elem, Dimens, DivNeg>>(poly)),
-    StaticVector<Elem, Dimens>(std::forward<PolyMod<Elem, Dimens, DivNeg>>(poly)) {} //Appelle ctrs. transfert
-
-/**de conversion**/
-template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
-PolyMod<Elem, Dimens, DivNeg>::PolyMod(const VectPoly<Elem>& poly):
-    Vector<Elem>(poly),
-    VectPoly<Elem>(poly),
-    StaticVector<Elem, Dimens>(static_cast<StaticVector<Elem, Dimens>>(poly)) {}
 
 
 
-/**--------------------OPERATEURS**/
-/**assignation a vecteur**/
-template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
-PolyMod<Elem, Dimens, DivNeg>& PolyMod<Elem, Dimens, DivNeg>::operator=(const Vector<Elem>& vect)
+template <typename T, unsigned int s, PolyDiv<T> DivNeg>
+ModularPolynomial<T, s, DivNeg>::ModularPolynomial():
+ Vector<T>(),
+ Polynomial<T>(),
+ StaticVector<T, s>() {}
+
+template <typename T, unsigned int s, PolyDiv<T> DivNeg>
+ModularPolynomial<T, s, DivNeg>::ModularPolynomial(const T& element):
+    Vector<T>(element, s),
+    Polynomial<T>(element, s),
+    StaticVector<T, s>(element) {}
+
+template <typename T, unsigned int s, PolyDiv<T> DivNeg>
+ModularPolynomial<T, s, DivNeg>::ModularPolynomial(const T* elemArray):
+    Vector<T>(elemArray, s),
+    Polynomial<T>(elemArray, s),
+    StaticVector<T, s>(elemArray) {}
+
+
+template <typename T, unsigned int s, PolyDiv<T> DivNeg>
+ModularPolynomial<T, s, DivNeg>::ModularPolynomial(const ModularPolynomial<T, s, DivNeg>& poly):
+    Vector<T>(poly),
+    Polynomial<T>(poly),
+    StaticVector<T, s>(poly) {}
+
+
+template <typename T, unsigned int s, PolyDiv<T> DivNeg>
+ModularPolynomial<T, s, DivNeg>::ModularPolynomial(ModularPolynomial<T, s, DivNeg>&& poly):
+    Vector<T>(std::forward<ModularPolynomial<T, s, DivNeg>>(poly)),
+    Polynomial<T>(std::forward<ModularPolynomial<T, s, DivNeg>>(poly)),
+    StaticVector<T, s>(std::forward<ModularPolynomial<T, s, DivNeg>>(poly)) {}
+
+
+template <typename T, unsigned int s, PolyDiv<T> DivNeg>
+ModularPolynomial<T, s, DivNeg>::ModularPolynomial(const Polynomial<T>& poly):
+    Vector<T>(poly),
+    Polynomial<T>(poly),
+    StaticVector<T, s>(static_cast<StaticVector<T, s>>(poly)) {}
+
+
+
+
+
+template <typename T, unsigned int s, PolyDiv<T> DivNeg>
+ModularPolynomial<T, s, DivNeg>& ModularPolynomial<T, s, DivNeg>::operator=(const Vector<T>& vect)
 {
-    this->StaticVector<Elem, Dimens>::operator=(vect);//Appel a la methode de StaticVector
-    this->evalDeg(); //Met degre a jour
+    this->StaticVector<T, s>::operator=(vect);
+    this->evalDeg();
     return *this;
 }
-/**assignation a vecteur polynome**/
-template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
-PolyMod<Elem, Dimens, DivNeg>& PolyMod<Elem, Dimens, DivNeg>::operator=(const VectPoly<Elem>& poly) {
-    this->StaticVector<Elem, Dimens>::operator=(poly);//Appel a la methode de StaticVector
+
+template <typename T, unsigned int s, PolyDiv<T> DivNeg>
+ModularPolynomial<T, s, DivNeg>& ModularPolynomial<T, s, DivNeg>::operator=(const Polynomial<T>& poly) {
+    this->StaticVector<T, s>::operator=(poly);
     _deg = poly.deg();
-    _degModified = false; //Degre mis a jour
+    _degModified = false;
     return *this;
 }
-/**assignation a vecteur statique**/
-template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
-PolyMod<Elem, Dimens, DivNeg>& PolyMod<Elem, Dimens, DivNeg>::operator=(const StaticVector<Elem, Dimens>& vect)
+
+template <typename T, unsigned int s, PolyDiv<T> DivNeg>
+ModularPolynomial<T, s, DivNeg>& ModularPolynomial<T, s, DivNeg>::operator=(const StaticVector<T, s>& vect)
 {
-    this->StaticVector<Elem, Dimens>::operator=(vect);//Appel a la methode de StaticVector
-    this->evalDeg(); //Met degre a jour
+    this->StaticVector<T, s>::operator=(vect);
+    this->evalDeg();
     return *this;
 }
-/**assignation a polynome modulaire**/
-template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
-PolyMod<Elem, Dimens, DivNeg>& PolyMod<Elem, Dimens, DivNeg>::operator=(const PolyMod<Elem, Dimens, DivNeg>& poly)
+
+template <typename T, unsigned int s, PolyDiv<T> DivNeg>
+ModularPolynomial<T, s, DivNeg>& ModularPolynomial<T, s, DivNeg>::operator=(const ModularPolynomial<T, s, DivNeg>& poly)
 {
-    this->StaticVector<Elem, Dimens>::operator=(poly);//Appel a la methode de StaticVector
+    this->StaticVector<T, s>::operator=(poly);
     _deg = poly.deg();
-    _degModified = false; //Degre mis a jour
+    _degModified = false;
     return *this;
 }
 
-/**transfert d'un vecteur**/
-template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
-PolyMod<Elem, Dimens, DivNeg>& PolyMod<Elem, Dimens, DivNeg>::operator=(Vector<Elem>&& vect)
+
+template <typename T, unsigned int s, PolyDiv<T> DivNeg>
+ModularPolynomial<T, s, DivNeg>& ModularPolynomial<T, s, DivNeg>::operator=(Vector<T>&& vect)
 {
-    this->StaticVector<Elem, Dimens>::operator=(vect);//Appel a la methode de StaticVector
-    this->evalDeg(); //Met degre a jour
+    this->StaticVector<T, s>::operator=(vect);
+    this->evalDeg();
     return *this;
 }
-/**transfert d'un polynome**/
-template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
-PolyMod<Elem, Dimens, DivNeg>& PolyMod<Elem, Dimens, DivNeg>::operator=(VectPoly<Elem>&& poly)
+
+template <typename T, unsigned int s, PolyDiv<T> DivNeg>
+ModularPolynomial<T, s, DivNeg>& ModularPolynomial<T, s, DivNeg>::operator=(Polynomial<T>&& poly)
 {
-    this->StaticVector<Elem, Dimens>::operator=(poly);//Appel a la methode de StaticVector
+    this->StaticVector<T, s>::operator=(poly);
     _deg = poly.deg();
-    _degModified = false; //Degre mis a jour
+    _degModified = false;
     return *this;
 }
-/**transfert d'un vecteur statique**/
-template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
-PolyMod<Elem, Dimens, DivNeg>& PolyMod<Elem, Dimens, DivNeg>::operator=(StaticVector<Elem, Dimens>&& vect)
+
+template <typename T, unsigned int s, PolyDiv<T> DivNeg>
+ModularPolynomial<T, s, DivNeg>& ModularPolynomial<T, s, DivNeg>::operator=(StaticVector<T, s>&& vect)
 {
-    this->StaticVector<Elem, Dimens>::operator=(vect);//Appel a la methode de StaticVector
-    this->evalDeg(); //Met degre a jour
+    this->StaticVector<T, s>::operator=(vect);
+    this->evalDeg();
     return *this;
 }
-/**transfert d'un polynome modulaire**/
-template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
-PolyMod<Elem, Dimens, DivNeg>& PolyMod<Elem, Dimens, DivNeg>::operator=(PolyMod<Elem, Dimens, DivNeg>&& poly)
+
+template <typename T, unsigned int s, PolyDiv<T> DivNeg>
+ModularPolynomial<T, s, DivNeg>& ModularPolynomial<T, s, DivNeg>::operator=(ModularPolynomial<T, s, DivNeg>&& poly)
 {
-    this->StaticVector<Elem, Dimens>::operator=(poly);//Appel a la methode de StaticVector
+    this->StaticVector<T, s>::operator=(poly);
     _deg = poly.deg();
-    _degModified = false; //Degre mis a jour
+    _degModified = false;
     return *this;
 }
 
 
-/**op+= addition d'un vecteur (idem pour polynome)**/
-template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
-void PolyMod<Elem, Dimens, DivNeg>::operator+=(const Vector<Elem>& vect)
+
+template <typename T, unsigned int s, PolyDiv<T> DivNeg>
+void ModularPolynomial<T, s, DivNeg>::operator+=(const Vector<T>& vect)
 {
-    this->StaticVector<Elem, Dimens>::operator+=(vect); //Appelle op. += de StaticVector
-    this->evalDeg(); //Met degre a jour
+    this->StaticVector<T, s>::operator+=(vect);
+    this->evalDeg();
 }
 
-/**op-= soustraction d'un vecteur (idem pour polynome)**/
-template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
-void PolyMod<Elem, Dimens, DivNeg>::operator-=(const Vector<Elem>& vect)
+
+template <typename T, unsigned int s, PolyDiv<T> DivNeg>
+void ModularPolynomial<T, s, DivNeg>::operator-=(const Vector<T>& vect)
 {
-    this->StaticVector<Elem, Dimens>::operator-=(vect); //Appelle op. -= de StaticVector
-    this->evalDeg(); //Met degre a jour
+    this->StaticVector<T, s>::operator-=(vect);
+    this->evalDeg();
 }
 
-/**op*= multiplication par polynome**/
-template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
-void PolyMod<Elem, Dimens, DivNeg>::operator*=(const VectPoly<Elem>& other)
-{
-	//Multiplie this par polynome other, modulo (x^Dimens - Diviseur = DivNeg)
-	Elem* oldValues = _values;
-	_values = new Elem[Dimens]; //Nouvelles valeurs
-	int otherDeg = other.deg();
-	int thisDeg = this->deg();
 
-	//Degre qui resulterait de la multiplication SANS MODULO
+template <typename T, unsigned int s, PolyDiv<T> DivNeg>
+void ModularPolynomial<T, s, DivNeg>::operator*=(const Polynomial<T>& other)
+{
+
+ T* oldValues = _values;
+ _values = new T[s];
+ int otherDeg = other.deg();
+ int thisDeg = this->deg();
+
+
     int newDeg = _deg < 0 || otherDeg < 0 ? -1 : thisDeg + otherDeg;
-    int DimInt = static_cast<int>(Dimens);
+    int DimInt = static_cast<int>(s);
 
-	//Degres < Dimens : partie sans modulo
-    for (int i=0; i<DimInt && i<=newDeg; ++i) //Parcourt degres (<Dimens) de polynome resultant
+
+    for (int i=0; i<DimInt && i<=newDeg; ++i)
     {
-        _values[i] = 0; //Initialise le coefficient i
-        //Parcourt valeurs j telles que (0 <= j <= _deg) et (0 <= i-j <= otherDeg)
-        for (int j=(i>otherDeg ? i-otherDeg : 0); j<=i && j<=_deg; j++) //Calcule coeff.
+        _values[i] = 0;
+
+        for (int j=(i>otherDeg ? i-otherDeg : 0); j<=i && j<=_deg; j++)
         {
-			//Somme des coeffs dont la somme des degres vaut i : j+(i-j)=i
-			_values[i] += oldValues[j] * other[i-j]; //Ajoute produit au coeff de degre i
+
+   _values[i] += oldValues[j] * other[i-j];
         }
     }
 
-	//Degres >= Dimens : doit appliquer modulo
-	PolyDyn<Elem> DivMod(DivNeg); //Valeur modulaire correspondant a x^i
-    for (int i=DimInt; i<=newDeg; ++i) //Parcourt degres (>=Dimens) de polynome resultant
+
+ PolyDyn<T> DivMod(DivNeg);
+    for (int i=DimInt; i<=newDeg; ++i)
     {
-        Elem mMultip=0; //Compteur de multiples du modulo a ajouter au coeff de degre j
+        T mMultip=0;
 
-        //Parcourt SUITE des valeurs j telles que (0 <= j <= _deg) et (0 <= i-j <= otherDeg)
-        for (int j=i-otherDeg; j<= thisDeg; ++j) mMultip += oldValues[j] * other[i-j]; //Calcule multiple
 
-		//Ajoute aux coeff. de this le produit de mMultip et du polynome modulé correspondant à x^i
-		for (int j=0; j<DimInt; j++) _values[j] += mMultip * DivMod[j];
+        for (int j=i-otherDeg; j<= thisDeg; ++j) mMultip += oldValues[j] * other[i-j];
 
-		//Ajuste le polynôme modulé à la puissance suivante : x^i * x
-		Elem greatestCoeff = DivMod[Dimens-1]; //Coefficient devenant degre Dimens
+
+  for (int j=0; j<DimInt; j++) _values[j] += mMultip * DivMod[j];
+
+
+  T greatestCoeff = DivMod[s-1];
         for (int j=DimInt-1; j>0; j--)
         {
-			DivMod[j] = DivMod[j-1]; //Tous coefficients "montent" de un degré
-			DivMod[j] += greatestCoeff * DivNeg[j]; //On ajoute le polynôme diviseur fois le coeff de degre i+1
+   DivMod[j] = DivMod[j-1];
+   DivMod[j] += greatestCoeff * DivNeg[j];
         }
-        DivMod[0] = greatestCoeff * DivNeg[0]; //Coeff de plus bas degré
+        DivMod[0] = greatestCoeff * DivNeg[0];
     }
     if (newDeg < DimInt)
     {
-		for (int i = newDeg+1; i<DimInt; ++i) _values[i] = 0; //Initialise coeff restants si necessaire
-		_deg = newDeg; //Le degre resultant n'a pas ete affecte par le modulo -> on le conserve
-		_degModified = false; //Degre est a jour
+  for (int i = newDeg+1; i<DimInt; ++i) _values[i] = 0;
+  _deg = newDeg;
+  _degModified = false;
     }
-    else this->evalDeg(); //Le degre resultat peut avoir ete modifie -> on le reevalue
+    else this->evalDeg();
     delete[] oldValues;
 }
 
 
-/**--------------------HORS CLASSE**/
 
-/**addition binaire entre PolyMod de meme type**/
-template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
-PolyMod<Elem, Dimens, DivNeg> operator+(const PolyMod<Elem, Dimens, DivNeg>& polyA, const PolyMod<Elem, Dimens, DivNeg>& polyB)
+
+
+template <typename T, unsigned int s, PolyDiv<T> DivNeg>
+ModularPolynomial<T, s, DivNeg> operator+(const ModularPolynomial<T, s, DivNeg>& polyA, const ModularPolynomial<T, s, DivNeg>& polyB)
 {
-	PolyMod<Elem, Dimens, DivNeg> resPoly(polyA); //Copie de polyA comme Polynome Modulaire
+ ModularPolynomial<T, s, DivNeg> resPoly(polyA);
     resPoly += polyB;
-    return resPoly; //Retourne par valeur (effc++)
+    return resPoly;
 }
 
-/**soustraction binaire entre PolyMod de meme type**/
-template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
-PolyMod<Elem, Dimens, DivNeg> operator-(const PolyMod<Elem, Dimens, DivNeg>& polyA, const PolyMod<Elem, Dimens, DivNeg>& polyB)
+
+template <typename T, unsigned int s, PolyDiv<T> DivNeg>
+ModularPolynomial<T, s, DivNeg> operator-(const ModularPolynomial<T, s, DivNeg>& polyA, const ModularPolynomial<T, s, DivNeg>& polyB)
 {
-    PolyMod<Elem, Dimens, DivNeg> resPoly(polyA); //Copie de polyA comme Polynome Modulaire
+    ModularPolynomial<T, s, DivNeg> resPoly(polyA);
     resPoly += polyB;
-    return resPoly; //Retourne par valeur (effc++)
+    return resPoly;
 }
 
-/**multiplication de PolyMod de meme type**/
-template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
-PolyMod<Elem, Dimens, DivNeg> operator*(const PolyMod<Elem, Dimens, DivNeg>& polyA, const PolyMod<Elem, Dimens, DivNeg>& polyB)
+
+template <typename T, unsigned int s, PolyDiv<T> DivNeg>
+ModularPolynomial<T, s, DivNeg> operator*(const ModularPolynomial<T, s, DivNeg>& polyA, const ModularPolynomial<T, s, DivNeg>& polyB)
 {
-    PolyMod<Elem, Dimens, DivNeg> resPoly(polyA); //Copie de polyA comme Polynome Modulaire
+    ModularPolynomial<T, s, DivNeg> resPoly(polyA);
     resPoly *= polyB;
-    return resPoly; //Retourne par valeur (effc++)
+    return resPoly;
 }
 
-/**plus unaire**/
-template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
-PolyMod<Elem, Dimens, DivNeg> operator+(const PolyMod<Elem, Dimens, DivNeg>& poly)
+
+template <typename T, unsigned int s, PolyDiv<T> DivNeg>
+ModularPolynomial<T, s, DivNeg> operator+(const ModularPolynomial<T, s, DivNeg>& poly)
 {
-    PolyMod<Elem, Dimens, DivNeg> newPoly(poly); //Ctr copie
+    ModularPolynomial<T, s, DivNeg> newPoly(poly);
     newPoly.unary_plus();
-    return newPoly; //Retourne par valeur (effc++)
+    return newPoly;
 }
 
-/**moins unaire**/
-template <typename Elem, std::size_t Dimens, PolyDiv<Elem> DivNeg>
-PolyMod<Elem, Dimens, DivNeg> operator-(const PolyMod<Elem, Dimens, DivNeg>& poly)
+
+template <typename T, unsigned int s, PolyDiv<T> DivNeg>
+ModularPolynomial<T, s, DivNeg> operator-(const ModularPolynomial<T, s, DivNeg>& poly)
 {
-    PolyMod<Elem, Dimens, DivNeg> newPoly(poly); //Ctr copie
+    ModularPolynomial<T, s, DivNeg> newPoly(poly);
     newPoly.unary_minus();
-    return newPoly; //Retourne par valeur (effc++)
+    return newPoly;
 }
 
 
-#endif // POLYMOD_H
+#endif

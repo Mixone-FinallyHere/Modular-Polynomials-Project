@@ -7,163 +7,163 @@
 #include "vector.hpp"
 
 
-template <typename Elem>
-class VectPoly: virtual public Vector<Elem>
+template <typename T>
+class Polynomial: virtual public Vector<T>
 {
-	protected:
-		using Vector<Elem>::_dim;
-		using Vector<Elem>::_values;
+ protected:
+  using Vector<T>::_dim;
+  using Vector<T>::_values;
 
-		int _degree;
-		void evalDeg() const;
-
-
-	public:
-		/**Constructeurs (protected car classe abstraite)**/
-        VectPoly();							// trivial
-        VectPoly(const Elem&, std::size_t);	// init: valeur + taille
-        VectPoly(const VectPoly<Elem>&);	// de copie
-        VectPoly(VectPoly<Elem>&&);			// de transfert
-        VectPoly(const Vector<Elem>&);		// de conversion
-
-        /**Destructeur**/
-        //Pas besoin de destructeur autre que celui de classe de base
-
-		/**Operateurs**/
-		using Vector<Elem>::operator[]; //Accès (evite de cacher)
-		virtual inline Elem& operator[] (std::ptrdiff_t) override; //Redefinit modification
-
-        virtual VectPoly<Elem>& operator=(const Vector<Elem>&) override =0; //Assignation a vecteur
-        virtual VectPoly<Elem>& operator=(Vector<Elem>&&) override =0;		//Transfert d'un vecteur
-		virtual VectPoly<Elem>& operator=(const VectPoly<Elem>&) =0; //Assignation a polynome
-		virtual VectPoly<Elem>& operator=(VectPoly<Elem>&&) =0; 	 //Transfert d'un polynome
-
-        virtual void operator+=(const Vector<Elem>&) override =0;	//Addition d'un vecteur
-        virtual void operator-=(const Vector<Elem>&) override =0;	//Soustraction d'un vecteur
-
-		virtual void operator*=(const Elem&) override; 	//Multiplication par element
-        virtual void operator*=(const VectPoly<Elem>&) =0; //Multiplication par vecteur polynome
+  int _degree;
+  void evalDeg() const;
 
 
-		/**Autres methodes**/
-		//Retourne le degre du polynome, reevalue si necessaire
+ public:
+
+        Polynomial();
+        Polynomial(const T&, unsigned int);
+        Polynomial(const Polynomial<T>&);
+        Polynomial(Polynomial<T>&&);
+        Polynomial(const Vector<T>&);
+
+
+
+
+
+  using Vector<T>::operator[];
+  virtual inline T& operator[] (std::ptrdiff_t) override;
+
+        virtual Polynomial<T>& operator=(const Vector<T>&) override =0;
+        virtual Polynomial<T>& operator=(Vector<T>&&) override =0;
+  virtual Polynomial<T>& operator=(const Polynomial<T>&) =0;
+  virtual Polynomial<T>& operator=(Polynomial<T>&&) =0;
+
+        virtual void operator+=(const Vector<T>&) override =0;
+        virtual void operator-=(const Vector<T>&) override =0;
+
+  virtual void operator*=(const T&) override;
+        virtual void operator*=(const Polynomial<T>&) =0;
+
+
+
+
         inline int deg() const { if (_degModified) this->evalDeg(); return _deg; };
-        Elem operator()(const Elem&) const; //Retourne la valeur numerique du polynome pour x=parametre
+        T operator()(const T&) const;
         virtual std::ostream& print(std::ostream& ostr) const override;
         virtual std::istream& iread(std::istream& istr) override;
 };
 
 
-/**--------------------CONSTRUCTEURS**/
+
 
 template<typename T>
-void VectPoly<T>::evalDeg(){
+void Polynomial<T>::evalDeg(){
      _degree=static_cast<int>(_dim)-1;
      while (_deg>=0 and _values[_deg]==0) --_deg;
 }
 
-/**initialisants**/
-template <typename Elem>
-VectPoly<Elem>::VectPoly():
-	Vector<Elem>(), _deg(-1) {} //Ctr par defaut (trivial) : polynome nul
 
-template <typename Elem>
-VectPoly<Elem>::VectPoly(const Elem& element, std::size_t dim): //Ctr correspondant de Vector
-    Vector<Elem>(element, dim), _deg(-1) { if (element!=0) _deg=static_cast<int>(dim)-1;}
+template <typename T>
+Polynomial<T>::Polynomial():
+ Vector<T>(), _deg(-1) {}
 
-template <typename Elem>
-VectPoly<Elem>::VectPoly(const Elem* elemArray, std::size_t dim):
-    Vector<Elem>(elemArray, dim), _deg(-1) { evalDeg(); } //Ctr correspondant de Vector
+template <typename T>
+Polynomial<T>::Polynomial(const T& element, unsigned int dim):
+    Vector<T>(element, dim), _deg(-1) { if (element!=0) _deg=static_cast<int>(dim)-1;}
 
-/**de copie**/
-template <typename Elem>
-VectPoly<Elem>::VectPoly(const VectPoly<Elem>& vect):
-    Vector<Elem>(vect), _deg(vect.deg()) {} //Appelle ctr. copie
-
-/**de transfert**/
-template <typename Elem>
-VectPoly<Elem>::VectPoly(VectPoly<Elem>&& vect):
-    Vector<Elem>(std::forward<VectPoly<Elem>>(vect)), _deg(vect._deg) {} //Appelle ctr. transfert
-
-/**de conversion**/
-template <typename Elem>
-VectPoly<Elem>::VectPoly(const  Vector<Elem>& vect):
-    Vector<Elem>(vect), _deg(-1) { evalDeg(); } //Conversion: copie + evalue degre
+template <typename T>
+Polynomial<T>::Polynomial(const T* elemArray, unsigned int dim):
+    Vector<T>(elemArray, dim), _deg(-1) { evalDeg(); }
 
 
-/**--------------------OPERATEURS**/
+template <typename T>
+Polynomial<T>::Polynomial(const Polynomial<T>& vect):
+    Vector<T>(vect), _deg(vect.deg()) {}
 
-/**modification element**/
-template <typename Elem>
-Elem& VectPoly<Elem>::operator[] (std::ptrdiff_t i)
+
+template <typename T>
+Polynomial<T>::Polynomial(Polynomial<T>&& vect):
+    Vector<T>(std::forward<Polynomial<T>>(vect)), _deg(vect._deg) {}
+
+
+template <typename T>
+Polynomial<T>::Polynomial(const Vector<T>& vect):
+    Vector<T>(vect), _deg(-1) { evalDeg(); }
+
+
+
+
+
+template <typename T>
+T& Polynomial<T>::operator[] (std::ptrdiff_t i)
 {
-    _degModified = true; //Le degre devra etre reevalue !
-    return this->Vector<Elem>::operator[](i);
+    _degModified = true;
+    return this->Vector<T>::operator[](i);
 }
 
-/**multiplication par element**/
-template <typename Elem>
-void VectPoly<Elem>::operator*=(const Elem& value)
+
+template <typename T>
+void Polynomial<T>::operator*=(const T& value)
 {
-    this->Vector<Elem>::operator*=(value); //Appelle op. *=
-    if (value==0) { _deg=-1; _degModified=false; } //Ajuste degre si necessaire
+    this->Vector<T>::operator*=(value);
+    if (value==0) { _deg=-1; _degModified=false; }
 }
 
-/**--------------------AUTRES METHODES**/
 
-/**ecriture sur ostream**/
-template <typename Elem>
-std::ostream& VectPoly<Elem>::print(std::ostream& ostr) const {
-	int thisDeg = this->deg(); //Reevalue degre si necessaire
-	if (thisDeg==-1) { ostr << 0; } //Polynome nul
-	else {
-		bool first = true;
-		for (int i=thisDeg; i>=0; --i){
-			if (first){
-				first=false;
-				ostr << _values[i]; //Pas de "+"
-			}else{
-				if (_values[i] < 0) ostr << " - " << -_values[i]; //Signe, valeur
-				else ostr << " + " << _values[i];
-			}
-			if (i>1) { ostr<< "x^" << i; } //Degre
-			else{
-                if (i==1) { ostr << "x"; } //x^1
-                //IF i==0, pas de x^0
-			}
-		}
-	}
-	return ostr;
+
+
+template <typename T>
+std::ostream& Polynomial<T>::print(std::ostream& ostr) const {
+ int thisDeg = this->deg();
+ if (thisDeg==-1) { ostr << 0; }
+ else {
+  bool first = true;
+  for (int i=thisDeg; i>=0; --i){
+   if (first){
+    first=false;
+    ostr << _values[i];
+   }else{
+    if (_values[i] < 0) ostr << " - " << -_values[i];
+    else ostr << " + " << _values[i];
+   }
+   if (i>1) { ostr<< "x^" << i; }
+   else{
+                if (i==1) { ostr << "x"; }
+
+   }
+  }
+ }
+ return ostr;
 }
 
-/**lecture d'un istream**/
-template <typename Elem>
-std::istream& VectPoly<Elem>::iread(std::istream& istr)
+
+template <typename T>
+std::istream& Polynomial<T>::iread(std::istream& istr)
 {
-    this->Vector<Elem>::iread(istr); //Methode de classe parente
-    this->evalDeg(); //Reevalue le degre
+    this->Vector<T>::iread(istr);
+    this->evalDeg();
     return istr;
 }
 
-/**evaluation**/
-template <typename Elem>
-Elem VectPoly<Elem>::operator()(const Elem& var_poly) const
+
+template <typename T>
+T Polynomial<T>::operator()(const T& var_poly) const
 {
-	int thisDeg = this->deg(); //Reevalue si necessaire
-	Elem result; //Resultat
-	if (thisDeg==-1) { result=0; } //Elem doit etre assignable & comparable avec 0
-	else
-	{
-		std::size_t i=_deg;
-		result=_values[i];
-		while (i>0) //METHODE DE HORNER (commence par plus haut degre)
-		{
-		 	--i;
-             result *= var_poly; //Multiplie par x tous coeff precedents
-             result += _values[i]; //Ajoute coeff suivant
-		}
-	}
-    return result; //Retourne par valeur
+ int thisDeg = this->deg();
+ T result;
+ if (thisDeg==-1) { result=0; }
+ else
+ {
+  unsigned int i=_deg;
+  result=_values[i];
+  while (i>0)
+  {
+    --i;
+             result *= var_poly;
+             result += _values[i];
+  }
+ }
+    return result;
 }
 
-#endif //VECTPOLY_H
+#endif
