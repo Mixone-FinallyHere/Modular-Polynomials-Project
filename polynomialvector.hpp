@@ -14,18 +14,14 @@ class VectPoly: virtual public Vector<Elem>
 		using Vector<Elem>::_dim;
 		using Vector<Elem>::_values;
 
-		mutable int _deg; //Degre = -1 si polynome nul, indice de derniere composante non nulle sinon
-		mutable bool _degModified = false;//Devient vrai si op. d'acces est utilise -> doit reevaluer degre
-		//Reevalue le degre apres modification de _values (index dernier element non nul) :
-		inline void evalDeg() const
-		{ _deg=static_cast<int>(_dim)-1; while (_deg>=0 and _values[_deg]==0) --_deg; _degModified=false;};
+		int _degree;
+		void evalDeg() const;
 
 
 	public:
 		/**Constructeurs (protected car classe abstraite)**/
         VectPoly();							// trivial
         VectPoly(const Elem&, std::size_t);	// init: valeur + taille
-        VectPoly(const Elem*, std::size_t);	// init: tableau valeurs + taille
         VectPoly(const VectPoly<Elem>&);	// de copie
         VectPoly(VectPoly<Elem>&&);			// de transfert
         VectPoly(const Vector<Elem>&);		// de conversion
@@ -59,6 +55,12 @@ class VectPoly: virtual public Vector<Elem>
 
 
 /**--------------------CONSTRUCTEURS**/
+
+template<typename T>
+void VectPoly<T>::evalDeg(){
+     _degree=static_cast<int>(_dim)-1;
+     while (_deg>=0 and _values[_deg]==0) --_deg;
+}
 
 /**initialisants**/
 template <typename Elem>
