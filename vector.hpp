@@ -1,5 +1,5 @@
-#ifndef _VECTOR_H_
-#define _VECTOR_H_
+#ifndef _VECTOR_HPP_
+#define _VECTOR_HPP_
 
 #include <iostream>
 #include <string>
@@ -175,5 +175,5 @@ void operator-(Vector<T>& vect) {
 }
 
 
-#endif // _VECTOR_H
+#endif
 

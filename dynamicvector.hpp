@@ -1,5 +1,5 @@
-#ifndef _DYNAMICVECTOR_H_
-#define _DYNAMICVECTOR_H_
+#ifndef _DYNAMICVECTOR_HPP_
+#define _DYNAMICVECTOR_HPP_
 
 #include "vector.hpp"
 
@@ -157,4 +157,4 @@ DynamicVector<T> operator-(const DynamicVector<T>& vect) {
 }
 
 
-#endif // _STATICVECTOR_H_
+#endif

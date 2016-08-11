@@ -1,5 +1,5 @@
-#ifndef _STATICVECTOR_H_
-#define _STATICVECTOR_H_
+#ifndef _STATICVECTOR_HPP_
+#define _STATICVECTOR_HPP_
 
 #include "vector.hpp"
 
@@ -105,4 +105,4 @@ StaticVector<T, s> operator*(const T& element, const StaticVector<T, s>& vect) {
     return vect * element; // Switch around to use already defined operator*
 }
 
-#endif // _STATICVECTOR_H_
+#endif

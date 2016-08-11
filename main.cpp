@@ -1,5 +1,5 @@
 #include <iostream>
-#include "polynomialvector.hpp"
+
 #include "modularpolynomial.hpp"
 
 // Miguel Terol Espino

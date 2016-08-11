@@ -1,10 +1,7 @@
-#ifndef POLYMOD_H
-#define POLYMOD_H
+#ifndef _MODULARPOLYNOMIAL_HPP_
+#define _MODULARPOLYNOMIAL_HPP_
 
-#include <cstddef>
-#include <stdexcept>
-
-#include "polynomialvector.hpp"
+#include "polynomial.hpp"
 #include "staticvector.hpp"
 
 // Miguel Terol Espino

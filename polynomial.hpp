@@ -1,5 +1,5 @@
-#ifndef VECTPOLY_H
-#define VECTPOLY_H
+#ifndef _POLYNOMIAL_HPP_
+#define _POLYNOMIAL_HPP_
 
 #include "dynamicvector.hpp"
 
